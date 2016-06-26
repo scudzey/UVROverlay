@@ -1,5 +1,3 @@
-#include "overlaywidget.h"
-#include "openvroverlaycontroller.h"
 #include "StaticOverlay.h"
 #include "OverlayManager.h"
 #include <openvr.h>
