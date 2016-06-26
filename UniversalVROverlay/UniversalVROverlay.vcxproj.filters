@@ -15,30 +15,30 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\scudzey\Source\UniversalVROverlay\inc\Overlay.h">
+    <ClInclude Include="..\inc\Overlay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\scudzey\Source\UniversalVROverlay\inc\OverlayManager.h">
+    <ClInclude Include="..\inc\OverlayManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\scudzey\Source\UniversalVROverlay\inc\StaticOverlay.h">
+    <ClInclude Include="..\inc\StaticOverlay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\scudzey\Source\UniversalVROverlay\inc\WindowOverlay.h">
+    <ClInclude Include="..\inc\WindowOverlay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\scudzey\Source\UniversalVROverlay\src\main.cpp">
+    <ClCompile Include="..\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\scudzey\Source\UniversalVROverlay\src\OverlayManager.cpp">
+    <ClCompile Include="..\src\OverlayManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\scudzey\Source\UniversalVROverlay\src\StaticOverlay.cpp">
+    <ClCompile Include="..\src\StaticOverlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\scudzey\Source\UniversalVROverlay\src\WindowOverlay.cpp">
+    <ClCompile Include="..\src\WindowOverlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -18,6 +18,18 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\inc\Overlay.h" />
+    <ClInclude Include="..\inc\OverlayManager.h" />
+    <ClInclude Include="..\inc\StaticOverlay.h" />
+    <ClInclude Include="..\inc\WindowOverlay.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\OverlayManager.cpp" />
+    <ClCompile Include="..\src\StaticOverlay.cpp" />
+    <ClCompile Include="..\src\WindowOverlay.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F24FA59F-A822-4253-9DC4-59F823EB40FF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -145,18 +157,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="C:\Users\scudzey\Source\UniversalVROverlay\inc\Overlay.h" />
-    <ClInclude Include="C:\Users\scudzey\Source\UniversalVROverlay\inc\OverlayManager.h" />
-    <ClInclude Include="C:\Users\scudzey\Source\UniversalVROverlay\inc\StaticOverlay.h" />
-    <ClInclude Include="C:\Users\scudzey\Source\UniversalVROverlay\inc\WindowOverlay.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="C:\Users\scudzey\Source\UniversalVROverlay\src\main.cpp" />
-    <ClCompile Include="C:\Users\scudzey\Source\UniversalVROverlay\src\OverlayManager.cpp" />
-    <ClCompile Include="C:\Users\scudzey\Source\UniversalVROverlay\src\StaticOverlay.cpp" />
-    <ClCompile Include="C:\Users\scudzey\Source\UniversalVROverlay\src\WindowOverlay.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
