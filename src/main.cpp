@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 	}
 
 	
-	StaticOverlay* overlay = new StaticOverlay("Texture.png");
+	StaticOverlay* overlay = new StaticOverlay("C:\\openvr\\Texture.png");
 	OverlayManager* mgr = new OverlayManager();
 	mgr->addOverlay(overlay);
 
