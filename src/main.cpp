@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 	}
 
 	
-	StaticOverlay* overlay = new StaticOverlay("C:\\Users\\scudzey\\Pictures\\dickbutt.png");
+	StaticOverlay* overlay = new StaticOverlay("Texture.png");
 	OverlayManager* mgr = new OverlayManager();
 	mgr->addOverlay(overlay);
 
