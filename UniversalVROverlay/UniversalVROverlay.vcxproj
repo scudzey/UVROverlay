@@ -19,16 +19,34 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\inc\RenderEnvironment.h" />
+    <ClInclude Include="..\inc\OverlayTexture.h" />
     <ClInclude Include="..\inc\Overlay.h" />
     <ClInclude Include="..\inc\OverlayManager.h" />
+    <ClInclude Include="..\inc\resources.h" />
     <ClInclude Include="..\inc\StaticOverlay.h" />
+    <ClInclude Include="..\inc\VertexObject.h" />
     <ClInclude Include="..\inc\WindowOverlay.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\RenderEnvironment.cpp" />
+    <ClCompile Include="..\src\OverlayTexture.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\OverlayManager.cpp" />
     <ClCompile Include="..\src\StaticOverlay.cpp" />
+    <ClCompile Include="..\src\VertexObject.cpp" />
     <ClCompile Include="..\src\WindowOverlay.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="UniversalVROverlay.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F24FA59F-A822-4253-9DC4-59F823EB40FF}</ProjectGuid>
@@ -83,13 +101,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\headers;$(SolutionDir)inc;$(IncludePath)</IncludePath>
-    <LibraryPath>$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\lib\win64;$(LibraryPath);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\headers;$(SolutionDir)inc;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\lib\win64;$(LibraryPath);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\headers;$(SolutionDir)inc;$(IncludePath)</IncludePath>
-    <LibraryPath>$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\lib\win64;$(LibraryPath);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\headers;$(SolutionDir)inc;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\lib\win64;$(LibraryPath);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -98,7 +116,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\headers;$(SolutionDir)inc</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\headers;$(SolutionDir)inc;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(Boost_Path)\include\boost-1_61;$(OpenVR_Path)\lib\win64;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -108,6 +127,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,9 +142,10 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(OpenVR_Path)\lib\win64\openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
