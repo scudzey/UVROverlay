@@ -1,9 +1,10 @@
 #pragma once
-#include "Overlay.h"
+#include <Windows.h>
 #include <D3D11_1.h>
 #include <D3DX11.h>
 #include <DXGI.h>
-#include <Windows.h>
+#include "Overlay.h"
+
 #include "OverlayTexture.h"
 
 class WindowOverlay : public virtual Overlay

@@ -1,21 +1,13 @@
 #include "RenderEnvironment.h"
 
-
-
 RenderEnvironment::RenderEnvironment(int32_t adapterIndex)
 {
-
 	HRESULT err;
-
 
 	REFIID iidVal = __uuidof(IDXGIFactory1);
 
-
 	if (FAILED(err = CreateDXGIFactory1(iidVal, (void**)&m_factory)))
 		return;
-
-	
-
 	
 	IDXGIAdapter1 *adapter;
 	if (FAILED(err = m_factory->EnumAdapters1(0, &adapter)))
@@ -41,16 +33,12 @@ RenderEnvironment::RenderEnvironment(int32_t adapterIndex)
 	UINT createFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #endif
 
-	//D3D_FEATURE_LEVEL level = D3D_FEATURE_LEVEL_11_1;
-
 	WCHAR *adapterName;
 	DXGI_ADAPTER_DESC desc;
 	
 	err = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createFlags, NULL, 0, D3D11_SDK_VERSION, &swapDesc, &m_swap, &m_d3d, NULL, &m_d3d_ctx);
 	if (FAILED(err))
 	{
-		//Log(TEXT("D3D11CreateDeviceAndSwapChain1: Failed on %s: 0x%08x. Trying compatibility mode"), adapterName.Array(), err);
-
 		m_bDisableCompatibilityMode = !m_bDisableCompatibilityMode;
 		err = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createFlags, NULL, 0, D3D11_SDK_VERSION, &swapDesc, &m_swap, &m_d3d, NULL, &m_d3d_ctx);
 	}
@@ -150,15 +138,10 @@ RenderEnvironment::RenderEnvironment(int32_t adapterIndex)
 
 }
 
-
 RenderEnvironment::~RenderEnvironment()
 {
 
 }
-
-
-
-//RenderEnvironment::mapBuffer(I)
 
 ID3D11Device* RenderEnvironment::getDevice()
 {
@@ -167,7 +150,6 @@ ID3D11Device* RenderEnvironment::getDevice()
 
 ID3D11DeviceContext* RenderEnvironment::getContext()
 {
-	//m_d3d->GetDontext(&m_d3d_ctx);
 	return m_d3d_ctx;
 }
 
@@ -176,7 +158,6 @@ void RenderEnvironment::setRenderTgt(ID3D11RenderTargetView* tgt)
 	m_renderTgt = tgt;
 
 }
-
 
 IDXGISwapChain* RenderEnvironment::getSwap()
 {

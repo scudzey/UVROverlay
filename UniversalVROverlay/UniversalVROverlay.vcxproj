@@ -27,7 +27,10 @@
     <ClInclude Include="..\inc\StaticOverlay.h" />
     <ClInclude Include="..\inc\VertexObject.h" />
     <ClInclude Include="..\inc\WindowOverlay.h" />
+    <ClInclude Include="OverlayManagerFormView.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="WindowDescriptor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\RenderEnvironment.cpp" />
@@ -37,6 +40,8 @@
     <ClCompile Include="..\src\StaticOverlay.cpp" />
     <ClCompile Include="..\src\VertexObject.cpp" />
     <ClCompile Include="..\src\WindowOverlay.cpp" />
+    <ClCompile Include="OverlayManagerFormView.cpp" />
+    <ClCompile Include="WindowDescriptor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UniversalVROverlay.rc" />
@@ -47,6 +52,9 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F24FA59F-A822-4253-9DC4-59F823EB40FF}</ProjectGuid>
@@ -143,6 +151,8 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ShowIncludes>false</ShowIncludes>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -189,4 +199,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="UniversalVROverlay.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

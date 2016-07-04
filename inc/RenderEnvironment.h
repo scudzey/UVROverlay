@@ -4,6 +4,7 @@
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3d11.lib")
 
+#include <Windows.h>
 #include <D3D11_1.h>
 #include <D3DX11.h>
 #include <DXGI.h>

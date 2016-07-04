@@ -30,7 +30,7 @@ void OverlayManager::updateOverlays()
 	}
 }
 
-std::vector<std::shared_ptr<Overlay>> OverlayManager::getOverlays() const
+const std::vector<std::shared_ptr<Overlay>>& OverlayManager::getOverlays() const
 {
 	return m_overlayVec;
 }

@@ -5,7 +5,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
 #include <openvr.h>
-#include <windows.h>
+//#include <windows.h>
 class Overlay
 {
 public:

@@ -11,7 +11,7 @@ public:
 	void addOverlay(Overlay* overlayObj);
 	void updateOverlays();
 
-	std::vector<std::shared_ptr<Overlay>> getOverlays() const;
+	const std::vector<std::shared_ptr<Overlay>>& getOverlays() const;
 
 	void sendEvent(const vr::VREvent_t & event);
 
