@@ -18,5 +18,7 @@ public:
 	virtual void updateTexture() = 0;
 	virtual void setOverlayMatrix(const vr::HmdMatrix34_t& relativePosition) = 0;
 	virtual boost::uuids::uuid getOverlayUuid() const = 0;
+	virtual void setRotate(const int axis, const int value)=0;
+	virtual void setTrans(const int axis, const int value)=0;
 };
 

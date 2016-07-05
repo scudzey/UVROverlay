@@ -1,5 +1,5 @@
 #include "WindowOverlay.h"
-
+#include <math.h>
 
 
 WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture)
@@ -7,7 +7,7 @@ WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture)
 	, m_targetHwnd(NULL)
 	, m_overlayUID(boost::uuids::random_generator()())
 {
-
+	memset(&m_overlayDistanceMtx, 0, sizeof(m_overlayDistanceMtx));
 }
 
 
@@ -108,7 +108,11 @@ void WindowOverlay::updateTexture()
 
 	//Release OpenVR texture reference
 	vr::VROverlay()->ReleaseNativeOverlayHandle(m_ulOverlayHandle, (void*)shaderResource);
+	//shaderResource->Release();
+	shaderResource = NULL;
 
+
+	vr::VROverlay()->SetOverlayTransformTrackedDeviceRelative(m_ulOverlayHandle, vr::k_unTrackedDeviceIndex_Hmd, &m_overlayDistanceMtx);
 	vr::VROverlay()->ShowOverlay(m_ulOverlayHandle);
 
 }
@@ -126,6 +130,116 @@ boost::uuids::uuid WindowOverlay::getOverlayUuid() const
 void WindowOverlay::setHwnd(HWND hWnd)
 {
 	m_targetHwnd = hWnd;
+}
+
+void WindowOverlay::setRotate(const int axis, const int value)
+{
+	switch (axis)
+	{
+	case X_AXIS:
+		m_xRotate = value;
+		break;
+	case Y_AXIS:
+		m_yRotate = value;
+		break;
+	case Z_AXIS:
+		m_zRotate = value;
+	}
+
+	updateTransform();
+}
+
+void WindowOverlay::setTrans(const int axis, const int value)
+{
+	switch (axis)
+	{
+	case X_AXIS:
+		m_xTrans = value;
+		break;
+	case Y_AXIS:
+		m_yTrans = value;
+		break;
+	case Z_AXIS:
+		m_zTrans = value;
+	}
+	updateTransform();
+}
+
+void WindowOverlay::updateTransform()
+{
+	vr::HmdMatrix44_t Translation, xRotate, yRotate, zRotate, scale;
+	vr::HmdMatrix44_t result;
+	memset(&scale, 0, sizeof(scale));
+	memset(&Translation, 0, sizeof(Translation));
+	memset(&xRotate, 0, sizeof(xRotate));
+	memset(&yRotate, 0, sizeof(yRotate));
+	memset(&zRotate, 0, sizeof(zRotate));
+
+	//Setup Scale (Currently fixed)
+	scale.m[0][0] = 1.0f;
+	scale.m[1][1] = 1.0f;
+	scale.m[2][2] = 1.0f;
+	scale.m[2][2] = 1.0f;
+
+
+	//Setup Translation
+	Translation.m[0][0] = 1.0f;
+	Translation.m[1][1] = 1.0f;
+	Translation.m[2][2] = 1.0f;
+	Translation.m[2][2] = 1.0f;
+	Translation.m[0][3] = (float)(m_xTrans) / 25.0f;
+	Translation.m[1][3] = (float)(m_yTrans) / 25.0f;
+	Translation.m[2][3] = (float)(m_zTrans) / 25.0f;
+	Translation.m[3][3] = 1;
+
+	//Setup xRotate matrix
+	xRotate.m[0][0] = 1;
+	xRotate.m[1][1] = std::cos(((float)m_xRotate)*(3.14159f / 180.0f));
+	xRotate.m[1][2] = std::sin(((float)m_xRotate)*(3.14159f / 180.0f)) * -1.0f;
+	xRotate.m[2][1] = std::sin(((float)m_xRotate)*(3.14159f / 180.0f));
+	xRotate.m[2][2] = std::cos(((float)m_xRotate)*(3.14159f / 180.0f));
+	xRotate.m[3][3] = 1;
+
+	//Setup yRotate matrix
+	yRotate.m[0][0] = std::cos(((float)m_yRotate)*(3.14159f / 180.0f));
+	yRotate.m[0][2] = std::sin(((float)m_yRotate)*(3.14159f / 180.0f));
+	yRotate.m[1][1] = 1;
+	yRotate.m[2][0] = std::sin(((float)m_yRotate)*(3.14159f / 180.0f)) * -1.0f;
+	yRotate.m[2][2] = std::cos(((float)m_yRotate)*(3.14159f / 180.0f));
+	yRotate.m[3][3] = 1;
+
+	//Setup zRotate matrix
+	zRotate.m[0][0] = std::cos(((float)m_zRotate)*(3.14159f / 180.0f));
+	zRotate.m[0][1] = std::sin(((float)m_zRotate)*(3.14159f / 180.0f)) * -1.0f;
+	zRotate.m[1][0] = std::sin(((float)m_zRotate)*(3.14159f / 180.0f));
+	zRotate.m[1][1] = std::cos(((float)m_zRotate)*(3.14159f / 180.0f));
+	zRotate.m[2][2] = 1;
+	zRotate.m[3][3] = 1;
+
+	//Matrix product all of them
+	result = multMatrix(scale, Translation);
+	result = multMatrix(result, xRotate);
+	result = multMatrix(result, yRotate);
+	result = multMatrix(result, zRotate);
+
+	for (int i= 0; i < 3; i++)
+		for (int j = 0; j < 4; j++)
+		{
+			m_overlayDistanceMtx.m[i][j] = result.m[i][j];
+		}
+}
+
+vr::HmdMatrix44_t WindowOverlay::multMatrix(vr::HmdMatrix44_t m1, vr::HmdMatrix44_t m2)
+{
+	vr::HmdMatrix44_t result;
+	memset(&result, 0, sizeof(result));
+
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			for (int k = 0; k < 4; k++)
+				result.m[i][j] += m1.m[i][k] * m2.m[k][j];
+
+	return result;
 }
 
 

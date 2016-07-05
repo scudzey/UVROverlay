@@ -3,7 +3,6 @@ name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 
-
 #include "StaticOverlay.h"
 #include "WindowOverlay.h"
 #include "OverlayManager.h"
@@ -15,6 +14,10 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "../UniversalVROverlay/resource.h"
 #include <Psapi.h>
 #include <PathCch.h>
+
+#include <CommCtrl.h>
+
+
 
 //Will Need to move to WindowManager class
 #include <vector>
@@ -28,6 +31,8 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 HWND  hWnd;										// Main Window HWND
+HFONT hFont;
+
 
 HWND AddButton, DelButton, OverlayList;			//Controler HWNDs
 
@@ -36,8 +41,10 @@ HWND SettingsStatic;
 HWND TitleText, TitleBox;
 HWND OverlayTypeText, OverlayTypeBox;
 HWND KeybindText, KeybindBox;
-//HWND TitleText, TitleBox;
-//HWND TitleText, TitleBox;
+HWND xRotate, yRotate, zRotate;
+HWND xRotateText, yRotateText, zRotateText;
+HWND xTranslate, yTranslate, zTranslate;
+HWND xTranslateText, yTranslateText, zTranslateText;
 
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
@@ -70,6 +77,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadStringW(hInstance, IDC_WIN32PROJECT3, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
+	hFont = CreateFont(
+		14, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE, ANSI_CHARSET,
+		OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+		DEFAULT_PITCH | FF_DONTCARE, L"Arial");
 
 	//Init d3d and manager
 	//TODO: add VR hooking to it's own class
@@ -166,12 +177,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	//------------------------------------------------------------------
 	// Main message loop:
-	while (GetMessage(&msg, nullptr, 0, 0))
+	
+	while (true)
 	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			if (msg.message == WM_QUIT)
+				break;
+			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+			
 		}
 		
 		//TODO: Put in a thread to run dynamically
@@ -184,16 +202,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{
 			(*it)->updateTexture();
 		}
-		
 
+		if (mgr && mgr->getOverlays().size() > 1)
+		{
+
+			mgr->getOverlays()[1]->setTrans(X_AXIS, SendMessage(xTranslate, TBM_GETPOS, 0, 0));
+			mgr->getOverlays()[1]->setTrans(Y_AXIS, SendMessage(yTranslate, TBM_GETPOS, 0, 0));
+			mgr->getOverlays()[1]->setTrans(Z_AXIS, SendMessage(zTranslate, TBM_GETPOS, 0, 0));
+
+			mgr->getOverlays()[1]->setRotate(X_AXIS, SendMessage(xRotate, TBM_GETPOS, 0, 0));
+			mgr->getOverlays()[1]->setRotate(Y_AXIS, SendMessage(yRotate, TBM_GETPOS, 0, 0));
+			mgr->getOverlays()[1]->setRotate(Z_AXIS, SendMessage(zRotate, TBM_GETPOS, 0, 0));
+		}
 	}
-
+	_CrtDumpMemoryLeaks();
 	return (int)msg.wParam;
 }
 
 BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam)
 {
 	TCHAR title[500];
+	TCHAR wndTitle[500];
 	ZeroMemory(title, sizeof(title));
 
 	if (IsWindowVisible(hWnd))
@@ -205,26 +234,32 @@ BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam)
 		GetModuleFileNameEx(hProcess, NULL, title, sizeof(title) / sizeof(title[0]));
 		//GetModuleFileName()
 		//GetWindowModuleFileName(hWnd, title, sizeof(title) / sizeof(title[0]));
-
-		//--------------------------------------------------
-
-		TCHAR wndTitle[500];
-		GetWindowText(hWnd, wndTitle, 500);
+		
 		TCHAR *name = wcsrchr(title, L'\\');
-		wndVec.push_back(WindowDescriptor(hWnd, std::wstring(wndTitle), std::wstring(name)));
+		
+		
+		if (GetWindowText(hWnd, wndTitle, 500) > 0)
+		{
+			//--------------------------------------------------
+			wndVec.push_back(WindowDescriptor(hWnd, std::wstring(wndTitle), std::wstring(name)));
+			
+			if (lstrcmpW(name, L"\\vlc.exe") == 0)
+			{
+				//MessageBox(NULL, name, name, MB_OK);
+				targethWnd = hWnd;
+			}
+			if (lstrcmpW(name, L"\\Discord.exe") == 0)
+			{
+				//MessageBox(NULL, name, name, MB_OK);
+				targethWnd2 = hWnd;
+			}
+		}
 
 		//--------------------------------------------------
 
-		if (lstrcmpW(name, L"\\vlc.exe") == 0)
-		{
-			//MessageBox(NULL, name, name, MB_OK);
-			targethWnd = hWnd;
-		}
-		if (lstrcmpW(name, L"\\Discord.exe") == 0)
-		{
-			//MessageBox(NULL, name, name, MB_OK);
-			targethWnd2 = hWnd;
-		}
+		
+
+		CloseHandle(hProcess);
 		
 	}
 
@@ -276,8 +311,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	/*hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 640 , 480, nullptr, nullptr, hInstance, nullptr);*/
 	hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT,0, nullptr, nullptr, hInstance, nullptr);
-	
+		CW_USEDEFAULT, 0, 785,565, nullptr, nullptr, hInstance, nullptr);
+	SendMessage(hWnd, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 	if (!hWnd)
 	{
@@ -305,33 +340,223 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_CREATE:
-
+	{
 		//---Define Window Controls-----------------------------------------
 		AddButton = CreateWindowEx(
 			NULL,
 			L"Button",
 			L"+",
 			WS_BORDER | WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-			220, 0,
+			225, 0,
 			30, 30,
 			hWnd, NULL,
 			hInst,
 			NULL);
+		SendMessage(AddButton, WM_SETFONT, (WPARAM)hFont, TRUE);
 		OverlayList = CreateWindowEx(
 			NULL,
 			L"ListBox",
 			L"test test test",
-			WS_BORDER | WS_CHILD | WS_VISIBLE ,
-			0, 30,
+			WS_BORDER | WS_CHILD | WS_VISIBLE,
+			5, 30,
 			250, 500,
 			hWnd, NULL,
 			hInst,
 			NULL);
+		SendMessage(OverlayList, WM_SETFONT, (WPARAM)hFont, TRUE);
+		SettingsStatic = CreateWindowEx(
+			NULL,
+			L"Button",
+			L"Overlay Settings",
+			WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+			265, 23,
+			500, 500,
+			hWnd, NULL,
+			hInst,
+			NULL);
+		SendMessage(SettingsStatic, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+		//-----------------------------------------------
+
+		/*
+		HWND TitleText, TitleBox;
+		HWND OverlayTypeText, OverlayTypeBox;
+		HWND KeybindText, KeybindBox;
+		
+		*/
+
+		TitleText = CreateWindowEx(
+			NULL,
+			L"Static",
+			L"Title: ",
+			WS_CHILD | WS_VISIBLE | SS_LEFT,
+			10, 22,
+			100, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(TitleText, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+		TitleBox = CreateWindowEx(
+			NULL,
+			L"edit",
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | ES_LEFT,
+			85, 20,
+			100, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(TitleBox, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+
+		OverlayTypeText = CreateWindowEx(
+			NULL,
+			L"Static",
+			L"Overlay Type: ",
+			WS_CHILD | WS_VISIBLE | SS_LEFT,
+			10, 47,
+			100, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(OverlayTypeText, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+		OverlayTypeBox = CreateWindowEx(
+			NULL,
+			L"edit",
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | ES_LEFT,
+			85, 45,
+			100, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(OverlayTypeBox, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+		KeybindText = CreateWindowEx(
+			NULL,
+			L"Static",
+			L"Keybind: ",
+			WS_CHILD | WS_VISIBLE | SS_LEFT,
+			10, 72,
+			100, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(KeybindText, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+		KeybindBox = CreateWindowEx(
+			NULL,
+			L"edit",
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | ES_LEFT,
+			85, 70,
+			100, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(KeybindBox, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+		/*
+		HWND xRotate, yRotate, zRotate;
+		HWND xRotateText, yRotateText, zRotateText;
+		HWND xTranslate, yTranslate, zTranslate;
+		HWND xTranslateText, yTranslateText, zTranslateText;
+		*/
+		xRotate = CreateWindowEx(
+			NULL,
+			TRACKBAR_CLASSW,
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			10, 100,
+			175, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(xRotate, TBM_SETRANGE, TRUE, MAKELONG(-180, 180));
+
+		yRotate = CreateWindowEx(
+			NULL,
+			TRACKBAR_CLASSW,
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			10, 130,
+			175, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(yRotate, TBM_SETRANGE, TRUE, MAKELONG(-180, 180));
+		
+		zRotate = CreateWindowEx(
+			NULL,
+			TRACKBAR_CLASSW,
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			10, 160,
+			175, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(zRotate, TBM_SETRANGE, TRUE, MAKELONG(-180, 180));
+
+
+
+		//-----------------------------------------------
+
+		xTranslate = CreateWindowEx(
+			NULL,
+			TRACKBAR_CLASSW,
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			10, 200,
+			175, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(xTranslate, TBM_SETRANGE, TRUE, MAKELONG(-100, 100));
+
+		yTranslate = CreateWindowEx(
+			NULL,
+			TRACKBAR_CLASSW,
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			10, 230,
+			175, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(yTranslate, TBM_SETRANGE, TRUE, MAKELONG(-100, 100));
+
+		zTranslate = CreateWindowEx(
+			NULL,
+			TRACKBAR_CLASSW,
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			10, 260,
+			175, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(zTranslate, TBM_SETRANGE, TRUE, MAKELONG(-100, 100));
+
+
+
 
 		//TODO: Populate list from saved data;
 
-		
-	break;
+
+		break;
+	}
+	case WM_GETMINMAXINFO:
+	{
+		MINMAXINFO* mmi = (MINMAXINFO*)lParam;
+		mmi->ptMinTrackSize.x = 785;
+		mmi->ptMinTrackSize.y = 565;
+		return 0;
+		break;
+	}
+
 	case WM_COMMAND:
 	{
 		int wmId = LOWORD(wParam);
@@ -367,6 +592,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
+
 		// TODO: Add any drawing code that uses hdc here...
 		
 		EndPaint(hWnd, &ps);
@@ -443,12 +669,6 @@ INT_PTR CALLBACK DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 				
 				vr::HmdMatrix34_t overlayDistanceMtx2;
 				memset(&overlayDistanceMtx2, 0, sizeof(overlayDistanceMtx2));
-				overlayDistanceMtx2.m[0][0] = overlayDistanceMtx2.m[1][1] = overlayDistanceMtx2.m[2][2] = 1.0f;
-				overlayDistanceMtx2.m[2][0] = -1.0f;
-				overlayDistanceMtx2.m[0][3] = -0.8f;
-				overlayDistanceMtx2.m[1][3] = 0.5f;
-				overlayDistanceMtx2.m[2][3] = -1.0f;
-				
 				overlay->setHwnd(wndVec[index].getHwnd());
 				overlay->setOverlayMatrix(overlayDistanceMtx2);
 				overlay->ShowOverlay();

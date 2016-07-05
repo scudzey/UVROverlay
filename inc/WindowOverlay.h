@@ -7,6 +7,13 @@
 
 #include "OverlayTexture.h"
 
+enum e_axis
+{
+	X_AXIS = 0,
+	Y_AXIS,
+	Z_AXIS
+};
+
 class WindowOverlay : public virtual Overlay
 {
 public:
@@ -20,6 +27,9 @@ public:
 	virtual boost::uuids::uuid getOverlayUuid() const;
 	virtual void setHwnd(HWND);
 
+	void setRotate(const int axis, const int value);
+	void setTrans(const int axis, const int value);
+
 private:
 	HWND m_targetHwnd;
 	boost::uuids::uuid m_overlayUID;
@@ -27,6 +37,19 @@ private:
 	vr::VROverlayHandle_t m_ulOverlayHandle;
 	vr::HmdMatrix34_t m_overlayDistanceMtx;
 	vr::Texture_t m_texture;
+
+	void updateTransform();
+
+	vr::HmdMatrix44_t multMatrix(vr::HmdMatrix44_t m1, vr::HmdMatrix44_t m2);
+
+	//Position Values
+	int m_xRotate;
+	int m_yRotate;
+	int m_zRotate;
+
+	int			 m_xTrans;
+	int			 m_yTrans;
+	int			 m_zTrans;
 
 };
 
