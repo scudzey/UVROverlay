@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/thread.hpp>
 #include <Windows.h>
 #include <D3D11_1.h>
 #include <D3DX11.h>
@@ -24,6 +25,7 @@ private:
 	IDXGISurface1 *m_surface;
 	ID3D11RenderTargetView *m_view;
 	ID3D11Buffer* m_buffer;
+	boost::mutex mtx_;
 	
 
 };

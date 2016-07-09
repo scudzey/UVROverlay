@@ -6,13 +6,21 @@ WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture)
 	:m_OverlayTexture(d3dTexture)
 	, m_targetHwnd(NULL)
 	, m_overlayUID(boost::uuids::random_generator()())
+	, m_updateThread(NULL)
+	, m_timer(m_io, boost::posix_time::millisec(17))
 {
 	memset(&m_overlayDistanceMtx, 0, sizeof(m_overlayDistanceMtx));
+	m_timer.async_wait(boost::bind(&WindowOverlay::asyncUpdate, this));
 }
 
 
 WindowOverlay::~WindowOverlay()
 {
+}
+
+void WindowOverlay::setupThread()
+{
+	m_io.run();
 }
 
 bool WindowOverlay::ShowOverlay()
@@ -59,6 +67,7 @@ bool WindowOverlay::ShowOverlay()
 		//Show the overlay
 		overlayError = vr::VROverlay()->ShowOverlay(m_ulOverlayHandle);
 		bSuccess = overlayError == vr::VROverlayError_None;
+		m_updateThread = new boost::thread(&WindowOverlay::setupThread, this);
 	}
 	return bSuccess;
 }
@@ -72,15 +81,29 @@ void WindowOverlay::HideOverlay()
 	vr::VROverlay()->HideOverlay(m_ulOverlayHandle);
 	vr::VROverlay()->DestroyOverlay(m_ulOverlayHandle);
 	m_ulOverlayHandle = vr::k_ulOverlayHandleInvalid;
+	m_io.stop();
+
+	//Stop Thread and cleanup
+	m_updateThread->join();
+	delete m_updateThread;
+	m_updateThread = NULL;
 }
 
 void WindowOverlay::handleEvent(const vr::VREvent_t & event)
 {
 }
 
+void WindowOverlay::asyncUpdate()
+{
+	updateTexture();
+	m_timer.expires_from_now(boost::posix_time::milliseconds(17));
+	m_timer.async_wait(boost::bind(&WindowOverlay::asyncUpdate, this));
+}
+
 void WindowOverlay::updateTexture()
 {
 	//ShowOverlay();
+	boost::lock_guard<boost::mutex> guard(mtx_);
 	vr::VRCompositor();
 	vr::VROverlay();
 	RECT rect;
@@ -113,7 +136,7 @@ void WindowOverlay::updateTexture()
 
 
 	vr::VROverlay()->SetOverlayTransformTrackedDeviceRelative(m_ulOverlayHandle, vr::k_unTrackedDeviceIndex_Hmd, &m_overlayDistanceMtx);
-	vr::VROverlay()->ShowOverlay(m_ulOverlayHandle);
+	//vr::VROverlay()->ShowOverlay(m_ulOverlayHandle);
 
 }
 
@@ -163,6 +186,36 @@ void WindowOverlay::setTrans(const int axis, const int value)
 		m_zTrans = value;
 	}
 	updateTransform();
+}
+
+int WindowOverlay::getRotate(const int axis)
+{
+	switch (axis)
+	{
+	case X_AXIS:
+		return m_xRotate;
+	case Y_AXIS:
+		return m_yRotate;	
+	case Z_AXIS:
+		return m_zRotate;
+	}
+
+	return 0;
+}
+
+int WindowOverlay::getTrans(const int axis)
+{
+	switch (axis)
+	{
+	case X_AXIS:
+		return m_xTrans;
+	case Y_AXIS:
+		return m_yTrans;
+		break;
+	case Z_AXIS:
+		return m_zTrans;
+	}
+	return 0;
 }
 
 void WindowOverlay::updateTransform()
@@ -240,6 +293,26 @@ vr::HmdMatrix44_t WindowOverlay::multMatrix(vr::HmdMatrix44_t m1, vr::HmdMatrix4
 				result.m[i][j] += m1.m[i][k] * m2.m[k][j];
 
 	return result;
+}
+
+void WindowOverlay::setName(const std::wstring& name)
+{
+	m_wndName = name;
+}
+
+void WindowOverlay::setExeName(const std::wstring& name)
+{
+	m_exeName = name;
+}
+
+std::wstring WindowOverlay::getName()
+{
+	return std::wstring(m_wndName);
+}
+
+std::wstring WindowOverlay::getExeName()
+{
+	return std::wstring(m_exeName);
 }
 
 

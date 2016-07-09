@@ -4,6 +4,7 @@
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3d11.lib")
 
+#include <boost/thread.hpp>
 #include <Windows.h>
 #include <D3D11_1.h>
 #include <D3DX11.h>
@@ -28,6 +29,9 @@ public:
 	void setRenderTgt(ID3D11RenderTargetView * tgt);
 	void RenderFrame();
 	IDXGISwapChain* getSwap();
+
+	void lockD3D();
+	void unlockD3d();
 	//void updateTexture(ID3D11Texture2D * tex);
 
 private:
@@ -44,6 +48,8 @@ private:
 	ID3D11BlendState        *m_curBlendState;
 	ID3D11BlendState        *m_disabledBlend;
 	BOOL                    m_bBlendingEnabled;
+
+	boost::mutex			m_mtx;
 
 	
 

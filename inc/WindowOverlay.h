@@ -1,9 +1,11 @@
 #pragma once
-#include <Windows.h>
+
+#include "Overlay.h"
+#include <boost/thread.hpp>
 #include <D3D11_1.h>
 #include <D3DX11.h>
 #include <DXGI.h>
-#include "Overlay.h"
+#include <string>
 
 #include "OverlayTexture.h"
 
@@ -19,6 +21,7 @@ class WindowOverlay : public virtual Overlay
 public:
 	WindowOverlay(OverlayTexture* d3dTexture);
 	virtual ~WindowOverlay();
+	void setupThread();
 	virtual bool ShowOverlay();
 	virtual void HideOverlay();
 	virtual void handleEvent(const vr::VREvent_t& event);
@@ -29,6 +32,15 @@ public:
 
 	void setRotate(const int axis, const int value);
 	void setTrans(const int axis, const int value);
+
+	int getRotate(const int axis);
+	int getTrans(const int axis);
+
+	std::wstring getName();
+	std::wstring getExeName();
+	void setName(const std::wstring& name);
+	void setExeName(const std::wstring& name);
+	void asyncUpdate();
 
 private:
 	HWND m_targetHwnd;
@@ -50,6 +62,16 @@ private:
 	int			 m_xTrans;
 	int			 m_yTrans;
 	int			 m_zTrans;
+
+	std::wstring  m_wndName;
+	std::wstring  m_exeName;
+
+	boost::asio::io_service m_io;
+	boost::asio::deadline_timer m_timer;
+	boost::thread*				m_updateThread;
+	boost::mutex				mtx_;
+
+
 
 };
 

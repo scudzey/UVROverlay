@@ -63,6 +63,8 @@ void OverlayTexture::GenerateTexture(unsigned int width, unsigned int height)
 bool OverlayTexture::setTextureFromWindow(HWND targetHWND, int x, int y)
 {
 	HDC textureDC;
+	m_d3dEnv->lockD3D();
+
 	HDC targetDC = GetDC(targetHWND);
 	if(FAILED(m_texVal->QueryInterface(__uuidof(IDXGISurface1), (void **)&m_surface)))
 		return false;
@@ -76,18 +78,21 @@ bool OverlayTexture::setTextureFromWindow(HWND targetHWND, int x, int y)
 	ReleaseDC(targetHWND, targetDC);
 
 	m_d3dEnv->getContext()->PSSetShaderResources(0, 1, &m_resource);
-	
+	m_d3dEnv->unlockD3d();
 	return true;
 }
 
 //Copies texture to Shader Resource
 void OverlayTexture::updateTexture(ID3D11ShaderResourceView* pDstResource)
 {
+	m_d3dEnv->lockD3D();
 	ID3D11Resource * dstTexture;
 	pDstResource->GetResource(&dstTexture);
 	m_d3dEnv->getContext()->CopyResource(dstTexture, m_texVal);
 	dstTexture->Release();
 	dstTexture = NULL;
+	
+	m_d3dEnv->unlockD3d();
 }
 
 ID3D11Texture2D* OverlayTexture::getTexture()

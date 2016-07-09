@@ -2,6 +2,8 @@
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
+#pragma comment(lib, "Psapi.lib")
+
 
 #include "StaticOverlay.h"
 #include "WindowOverlay.h"
@@ -57,6 +59,9 @@ RenderEnvironment* env;
 //OverlayMgr
 OverlayManager* mgr;
 
+//Selected Overlay Index
+int selectedIndex;
+
 
 std::vector<WindowDescriptor> wndVec;
 
@@ -67,11 +72,15 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 BOOL    CALLBACK    EnumProc(HWND hWnd, LPARAM lParam);
 INT_PTR	CALLBACK	DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
+void				updateListBox();
+void				setOptionsIndex();
 
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	//Init values
+	selectedIndex = -1;
 	//AllocConsole();
 	// Initialize global strings
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -141,14 +150,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//-----Overlay Config-----------------------------------------------	
 	EnumWindows(EnumProc, 0);
 
-	WindowOverlay* overlay = new WindowOverlay(overlayTexture);
-	overlay->setHwnd(targethWnd);
+	//WindowOverlay* overlay = new WindowOverlay(overlayTexture);
+	//overlay->setHwnd(targethWnd);
 
 	//WindowOverlay* overlay2 = new WindowOverlay(overlayTexture2);
 	//overlay2->setHwnd(targethWnd2);
 
 	
-	mgr->addOverlay(overlay);
+	//mgr->addOverlay(overlay);
 	//mgr->addOverlay(overlay2);
 
 	vr::HmdMatrix34_t overlayDistanceMtx;
@@ -160,8 +169,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	overlayDistanceMtx.m[2][3] = -1.0f;
 
 
-	overlay->setOverlayMatrix(overlayDistanceMtx);
-	overlay->ShowOverlay();
+	//overlay->setOverlayMatrix(overlayDistanceMtx);
+	//overlay->ShowOverlay();
 
 	vr::HmdMatrix34_t overlayDistanceMtx2;
 	memset(&overlayDistanceMtx2, 0, sizeof(overlayDistanceMtx2));
@@ -200,19 +209,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		const std::vector<std::shared_ptr<Overlay>> vec = mgr->getOverlays();
 		for (std::vector<std::shared_ptr<Overlay>>::const_iterator it = vec.begin(); it != vec.end(); ++it)
 		{
-			(*it)->updateTexture();
+			//(*it)->updateTexture();
 		}
 
-		if (mgr && mgr->getOverlays().size() > 1)
+		if (selectedIndex >= 0)
 		{
 
-			mgr->getOverlays()[1]->setTrans(X_AXIS, SendMessage(xTranslate, TBM_GETPOS, 0, 0));
-			mgr->getOverlays()[1]->setTrans(Y_AXIS, SendMessage(yTranslate, TBM_GETPOS, 0, 0));
-			mgr->getOverlays()[1]->setTrans(Z_AXIS, SendMessage(zTranslate, TBM_GETPOS, 0, 0));
+			mgr->getOverlays()[selectedIndex]->setTrans(X_AXIS, SendMessage(xTranslate, TBM_GETPOS, 0, 0));
+			mgr->getOverlays()[selectedIndex]->setTrans(Y_AXIS, SendMessage(yTranslate, TBM_GETPOS, 0, 0));
+			mgr->getOverlays()[selectedIndex]->setTrans(Z_AXIS, SendMessage(zTranslate, TBM_GETPOS, 0, 0));
 
-			mgr->getOverlays()[1]->setRotate(X_AXIS, SendMessage(xRotate, TBM_GETPOS, 0, 0));
-			mgr->getOverlays()[1]->setRotate(Y_AXIS, SendMessage(yRotate, TBM_GETPOS, 0, 0));
-			mgr->getOverlays()[1]->setRotate(Z_AXIS, SendMessage(zRotate, TBM_GETPOS, 0, 0));
+			mgr->getOverlays()[selectedIndex]->setRotate(X_AXIS, SendMessage(xRotate, TBM_GETPOS, 0, 0));
+			mgr->getOverlays()[selectedIndex]->setRotate(Y_AXIS, SendMessage(yRotate, TBM_GETPOS, 0, 0));
+			mgr->getOverlays()[selectedIndex]->setRotate(Z_AXIS, SendMessage(zRotate, TBM_GETPOS, 0, 0));
 		}
 	}
 	_CrtDumpMemoryLeaks();
@@ -357,7 +366,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			NULL,
 			L"ListBox",
 			L"test test test",
-			WS_BORDER | WS_CHILD | WS_VISIBLE,
+			WS_BORDER | WS_CHILD | WS_VISIBLE | LBS_NOTIFY,
 			5, 30,
 			250, 500,
 			hWnd, NULL,
@@ -565,15 +574,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (hiWd)
 		{
 		case BN_CLICKED:
-			/*TODO:
-				*Spawn Dialog for window selection
-				*Handle Dialog closing
-				*If OK, create Overlay object, add it to list, add it to overlayManager
-				*Destroy dialog
-			*/
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_WNDSELECT), hWnd, DlgProc);
-			//MessageBox(hWnd, L"Button clicked", L"OK", MB_OK);
+			break;
+		case LBN_SELCHANGE:
+			setOptionsIndex();
 		}
+		
 		switch (wmId)
 		{
 
@@ -664,14 +670,19 @@ INT_PTR CALLBACK DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 			int index = SendMessage(cBoxHwnd, CB_GETCURSEL, 0, 0);
 			if (index != CB_ERR)
 			{
+				
 				WindowOverlay* overlay = new WindowOverlay(new OverlayTexture(env));
 				mgr->addOverlay(overlay);
 				
 				vr::HmdMatrix34_t overlayDistanceMtx2;
 				memset(&overlayDistanceMtx2, 0, sizeof(overlayDistanceMtx2));
 				overlay->setHwnd(wndVec[index].getHwnd());
+				overlay->setName(wndVec[index].getTitle());
+				overlay->setExeName(wndVec[index].getExe());
 				overlay->setOverlayMatrix(overlayDistanceMtx2);
 				overlay->ShowOverlay();
+
+				updateListBox();
 
 
 			}
@@ -687,6 +698,39 @@ INT_PTR CALLBACK DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 		break;
 	}
 	return (INT_PTR)FALSE;
+
+}
+
+void updateListBox()
+{
+	SendMessage(OverlayList, LB_RESETCONTENT, 0, 0);
+	const std::vector<std::shared_ptr<Overlay>> vec = mgr->getOverlays();
+	for (std::vector<std::shared_ptr<Overlay>>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+	{
+		SendMessage(OverlayList, LB_ADDSTRING, 0, (LPARAM)(*it)->getName().c_str());
+	}
+
+}
+
+void setOptionsIndex()
+{
+	 int index = SendMessage(OverlayList, LB_GETCURSEL, 0, 0);
+	 	 
+	 if (index == LB_ERR)
+	 {
+		 selectedIndex = -1;
+		 return;
+	 }
+	 selectedIndex = index;
+	 
+	 SendMessage(xTranslate, TBM_SETPOS, TRUE, mgr->getOverlays()[selectedIndex]->getTrans(X_AXIS));
+	 SendMessage(yTranslate, TBM_SETPOS, TRUE, mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS));
+	 SendMessage(zTranslate, TBM_SETPOS, TRUE, mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS));
+
+	 SendMessage(xRotate, TBM_SETPOS, TRUE, mgr->getOverlays()[selectedIndex]->getRotate(X_AXIS));
+	 SendMessage(yRotate, TBM_SETPOS, TRUE, mgr->getOverlays()[selectedIndex]->getRotate(Y_AXIS));
+	 SendMessage(zRotate, TBM_SETPOS, TRUE, mgr->getOverlays()[selectedIndex]->getRotate(Z_AXIS));
+
 
 }
 

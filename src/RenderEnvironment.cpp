@@ -17,15 +17,13 @@ RenderEnvironment::RenderEnvironment(int32_t adapterIndex)
 	memset(&swapDesc, 0, sizeof(swapDesc));
 	swapDesc.BufferCount = 2;
 	swapDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	swapDesc.BufferDesc.Width = 1280;
-	swapDesc.BufferDesc.Height = 720;
+	swapDesc.BufferDesc.Width = 1920;
+	swapDesc.BufferDesc.Height = 1080;
 	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapDesc.OutputWindow = hWnd;
 	swapDesc.SampleDesc.Count = 1;
 	swapDesc.Windowed = TRUE;
 	swapDesc.Flags = DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE;
-
-	m_bDisableCompatibilityMode = 1;
 
 #ifdef _DEBUG
 	UINT createFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG;
@@ -37,12 +35,7 @@ RenderEnvironment::RenderEnvironment(int32_t adapterIndex)
 	DXGI_ADAPTER_DESC desc;
 	
 	err = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createFlags, NULL, 0, D3D11_SDK_VERSION, &swapDesc, &m_swap, &m_d3d, NULL, &m_d3d_ctx);
-	if (FAILED(err))
-	{
-		m_bDisableCompatibilityMode = !m_bDisableCompatibilityMode;
-		err = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createFlags, NULL, 0, D3D11_SDK_VERSION, &swapDesc, &m_swap, &m_d3d, NULL, &m_d3d_ctx);
-	}
-
+	
 	if (FAILED(err))
 	{
 		return;
@@ -162,6 +155,16 @@ void RenderEnvironment::setRenderTgt(ID3D11RenderTargetView* tgt)
 IDXGISwapChain* RenderEnvironment::getSwap()
 {
 	return m_swap;
+}
+
+void RenderEnvironment::lockD3D()
+{
+	m_mtx.lock();
+}
+
+void RenderEnvironment::unlockD3d()
+{
+	m_mtx.unlock();
 }
 
 void RenderEnvironment::RenderFrame()
