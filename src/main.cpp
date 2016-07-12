@@ -85,6 +85,22 @@ void				setOptionsIndex();
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+
+	//Test Version check to make sure it only runs on systems I authorize at compile time
+#if defined(TEST_VER) && defined(HDD_SERIAL)
+	unsigned long hd_serial = 0;
+	GetVolumeInformation(L"C:\\", NULL, 0, &hd_serial, NULL, NULL, NULL, 0);
+	if (hd_serial != HDD_SERIAL)
+	{
+		return -1;
+	}
+#endif
+
+
+
+
+
+
 	//Init values
 	selectedIndex = -1;
 	//AllocConsole();
