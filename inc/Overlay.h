@@ -24,12 +24,19 @@ public:
 	virtual void setRotate(const int axis, const int value)=0;
 	virtual void setTrans(const int axis, const int value)=0;
 
+	virtual void setScale(const int scale) = 0;
+	virtual int getScale() const =0;
+
+	virtual void setTracking(uint32_t device)=0;
+	virtual uint32_t getTracking() const = 0 ;
+
+
 	virtual void asyncUpdate() = 0;
 
-	virtual int getRotate(const int axis) = 0;
-	virtual int getTrans(const int axis) = 0;
+	virtual int getRotate(const int axis) const = 0 ;
+	virtual int getTrans(const int axis) const = 0 ;
 
-	virtual std::wstring getName()=0;
-	virtual void setName(const std::wstring& name)=0;
+	virtual std::wstring getName() const =0;
+	virtual void setName(const std::wstring& name)=0 ;
 };
 

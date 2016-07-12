@@ -47,6 +47,9 @@ HWND xRotate, yRotate, zRotate;
 HWND xRotateText, yRotateText, zRotateText;
 HWND xTranslate, yTranslate, zTranslate;
 HWND xTranslateText, yTranslateText, zTranslateText;
+HWND scaleSlide;
+
+HWND controllerCombo;
 
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
@@ -61,6 +64,9 @@ OverlayManager* mgr;
 
 //Selected Overlay Index
 int selectedIndex;
+
+//VR System
+vr::IVRSystem *pVRSystem;
 
 
 std::vector<WindowDescriptor> wndVec;
@@ -109,7 +115,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	
 	//----VR Init-------------------------------------------------------
 	vr::HmdError m_eLastHmdError;
-	vr::IVRSystem *pVRSystem = vr::VR_Init(&m_eLastHmdError, vr::VRApplication_Overlay);
+	pVRSystem = vr::VR_Init(&m_eLastHmdError, vr::VRApplication_Overlay);
 
 	if (m_eLastHmdError != vr::VRInitError_None)
 	{
@@ -187,31 +193,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//------------------------------------------------------------------
 	// Main message loop:
 	
-	while (true)
+	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		if (msg.message == WM_QUIT)
+			break;
+		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 		{
-			if (msg.message == WM_QUIT)
-				break;
-			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-			
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
-		
-		//TODO: Put in a thread to run dynamically
-		//env->RenderFrame();
-
-		//overlay->updateTexture();
-		//overlay2->updateTexture();
-		const std::vector<std::shared_ptr<Overlay>> vec = mgr->getOverlays();
-		for (std::vector<std::shared_ptr<Overlay>>::const_iterator it = vec.begin(); it != vec.end(); ++it)
-		{
-			//(*it)->updateTexture();
-		}
-
+				
 		if (selectedIndex >= 0)
 		{
 
@@ -222,6 +213,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			mgr->getOverlays()[selectedIndex]->setRotate(X_AXIS, SendMessage(xRotate, TBM_GETPOS, 0, 0));
 			mgr->getOverlays()[selectedIndex]->setRotate(Y_AXIS, SendMessage(yRotate, TBM_GETPOS, 0, 0));
 			mgr->getOverlays()[selectedIndex]->setRotate(Z_AXIS, SendMessage(zRotate, TBM_GETPOS, 0, 0));
+
+			mgr->getOverlays()[selectedIndex]->setScale(SendMessage(scaleSlide, TBM_GETPOS, 0, 0));
+
+			mgr->getOverlays()[selectedIndex]->setTracking(SendMessage(controllerCombo, CB_GETCURSEL, 0, 0));
 		}
 	}
 	_CrtDumpMemoryLeaks();
@@ -549,6 +544,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			NULL);
 		SendMessage(zTranslate, TBM_SETRANGE, TRUE, MAKELONG(-100, 100));
 
+		//-----------------------------------------------
+		controllerCombo = CreateWindowEx(
+			NULL,
+			L"ComboBox",
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | CBS_DROPDOWNLIST ,
+			210, 260,
+			175, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(controllerCombo, WM_SETFONT, (WPARAM)hFont, TRUE);		
+		SendMessage(controllerCombo, CB_ADDSTRING, 0, (LPARAM)std::wstring(L"Spacial").c_str());
+		SendMessage(controllerCombo, CB_ADDSTRING, 0, (LPARAM)L"HMD");
+		SendMessage(controllerCombo, CB_ADDSTRING, 0, (LPARAM)L"Controller 1");
+		SendMessage(controllerCombo, CB_ADDSTRING, 0, (LPARAM)L"Controller 2");
+
+		//-----------------------------------------------
+
+		scaleSlide = CreateWindowEx(
+			NULL,
+			TRACKBAR_CLASSW,
+			L"Test",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			10, 360,
+			175, 18,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		SendMessage(scaleSlide, TBM_SETRANGE, TRUE, MAKELONG(0, 100));
 
 
 
@@ -578,6 +603,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case LBN_SELCHANGE:
 			setOptionsIndex();
+	
+
 		}
 		
 		switch (wmId)
@@ -671,7 +698,7 @@ INT_PTR CALLBACK DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 			if (index != CB_ERR)
 			{
 				
-				WindowOverlay* overlay = new WindowOverlay(new OverlayTexture(env));
+				WindowOverlay* overlay = new WindowOverlay(new OverlayTexture(env), pVRSystem);
 				mgr->addOverlay(overlay);
 				
 				vr::HmdMatrix34_t overlayDistanceMtx2;
@@ -715,7 +742,7 @@ void updateListBox()
 void setOptionsIndex()
 {
 	 int index = SendMessage(OverlayList, LB_GETCURSEL, 0, 0);
-	 	 
+	 
 	 if (index == LB_ERR)
 	 {
 		 selectedIndex = -1;
@@ -731,7 +758,9 @@ void setOptionsIndex()
 	 SendMessage(yRotate, TBM_SETPOS, TRUE, mgr->getOverlays()[selectedIndex]->getRotate(Y_AXIS));
 	 SendMessage(zRotate, TBM_SETPOS, TRUE, mgr->getOverlays()[selectedIndex]->getRotate(Z_AXIS));
 
+	 SendMessage(scaleSlide, TBM_SETPOS, TRUE, mgr->getOverlays()[selectedIndex]->getScale());
 
+	 SendMessage(controllerCombo, CB_SETCURSEL, mgr->getOverlays()[selectedIndex]->getTracking(), 0);
 }
 
 

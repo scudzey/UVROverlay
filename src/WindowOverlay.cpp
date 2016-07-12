@@ -2,12 +2,14 @@
 #include <math.h>
 
 
-WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture)
+WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture, vr::IVRSystem* vrsys)
 	:m_OverlayTexture(d3dTexture)
 	, m_targetHwnd(NULL)
 	, m_overlayUID(boost::uuids::random_generator()())
 	, m_updateThread(NULL)
 	, m_timer(m_io, boost::posix_time::millisec(17))
+	, m_TrackedDevice(1) //Set to track to head by default
+	, m_vrSys(vrsys)
 {
 	memset(&m_overlayDistanceMtx, 0, sizeof(m_overlayDistanceMtx));
 	m_timer.async_wait(boost::bind(&WindowOverlay::asyncUpdate, this));
@@ -38,7 +40,7 @@ bool WindowOverlay::ShowOverlay()
 
 		//Setup DirectX texture
 		RECT rect;
-		if (!GetWindowRect(m_targetHwnd, &rect))
+		if (!GetClientRect(m_targetHwnd, &rect))
 		{
 			return false;
 		}
@@ -56,7 +58,8 @@ bool WindowOverlay::ShowOverlay()
 		vr::VROverlayError overlayError = vr::VROverlayError_None;
 
 		//Generate relative tracking to HMD
-		overlayError = vr::VROverlay()->SetOverlayTransformTrackedDeviceRelative(m_ulOverlayHandle, vr::k_unTrackedDeviceIndex_Hmd, &m_overlayDistanceMtx);
+		
+		setOverlayTracking();
 		if (overlayError != vr::VROverlayError_None)
 			return false;
 
@@ -91,6 +94,55 @@ void WindowOverlay::HideOverlay()
 
 void WindowOverlay::handleEvent(const vr::VREvent_t & event)
 {
+}
+void WindowOverlay::setTracking(uint32_t device)
+{
+	m_TrackedDevice = device;
+}
+
+uint32_t WindowOverlay::getTracking() const
+{
+	return m_TrackedDevice;
+}
+
+void WindowOverlay::setOverlayTracking()
+{
+	uint32_t controller = vr::k_unTrackedDeviceIndex_Hmd;
+	bool first = true;
+
+	//Set overlay to the VR world
+	if (m_TrackedDevice == 0)
+	{
+		vr::VROverlay()->SetOverlayTransformAbsolute(m_ulOverlayHandle, vr::VRCompositor()->GetTrackingSpace(), &m_overlayDistanceMtx);
+		return;
+	}
+
+	for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++)
+	{
+		switch (m_vrSys->GetTrackedDeviceClass(i))
+		{
+		case vr::TrackedDeviceClass_Controller:
+			if (first && m_TrackedDevice == 3)
+			{
+				first = false;
+				continue;
+			}
+			else if (first && m_TrackedDevice == 2)
+			{
+				controller = i;
+			}
+			else if (!first && m_TrackedDevice == 3)
+			{
+				controller = i;
+			}
+			break;
+		case vr::TrackedDeviceClass_HMD:
+			if (m_TrackedDevice == 1)
+				controller = i;
+		}
+
+	}
+	vr::VROverlay()->SetOverlayTransformTrackedDeviceRelative(m_ulOverlayHandle, controller, &m_overlayDistanceMtx);
 }
 
 void WindowOverlay::asyncUpdate()
@@ -135,9 +187,18 @@ void WindowOverlay::updateTexture()
 	shaderResource = NULL;
 
 
-	vr::VROverlay()->SetOverlayTransformTrackedDeviceRelative(m_ulOverlayHandle, vr::k_unTrackedDeviceIndex_Hmd, &m_overlayDistanceMtx);
+	//vr::VROverlay()->SetOverlayTransformTrackedDeviceRelative(m_ulOverlayHandle, vr::k_unTrackedDeviceIndex_Hmd, &m_overlayDistanceMtx);
+	setOverlayTracking();
 	//vr::VROverlay()->ShowOverlay(m_ulOverlayHandle);
 
+}
+
+void WindowOverlay::setScale(const int scale)
+{
+	m_scale = scale;
+}
+int WindowOverlay::getScale() const {
+	return m_scale;
 }
 
 void WindowOverlay::setOverlayMatrix(const vr::HmdMatrix34_t & relativePosition)
@@ -188,7 +249,7 @@ void WindowOverlay::setTrans(const int axis, const int value)
 	updateTransform();
 }
 
-int WindowOverlay::getRotate(const int axis)
+int WindowOverlay::getRotate(const int axis) const
 {
 	switch (axis)
 	{
@@ -203,7 +264,7 @@ int WindowOverlay::getRotate(const int axis)
 	return 0;
 }
 
-int WindowOverlay::getTrans(const int axis)
+int WindowOverlay::getTrans(const int axis) const
 {
 	switch (axis)
 	{
@@ -229,10 +290,10 @@ void WindowOverlay::updateTransform()
 	memset(&zRotate, 0, sizeof(zRotate));
 
 	//Setup Scale (Currently fixed)
-	scale.m[0][0] = 1.0f;
-	scale.m[1][1] = 1.0f;
-	scale.m[2][2] = 1.0f;
-	scale.m[2][2] = 1.0f;
+	scale.m[0][0] = (float)m_scale / 100.0f; //X Scale
+	scale.m[1][1] = (float)m_scale / 100.0f; //Y Scale
+	scale.m[2][2] = (float)m_scale / 100.0f; //Z Scale fixed
+	scale.m[3][3] = 1.0f; //unused
 
 
 	//Setup Translation
@@ -243,31 +304,31 @@ void WindowOverlay::updateTransform()
 	Translation.m[0][3] = (float)(m_xTrans) / 25.0f;
 	Translation.m[1][3] = (float)(m_yTrans) / 25.0f;
 	Translation.m[2][3] = (float)(m_zTrans) / 25.0f;
-	Translation.m[3][3] = 1;
+	Translation.m[3][3] = 1.0f;
 
 	//Setup xRotate matrix
-	xRotate.m[0][0] = 1;
+	xRotate.m[0][0] = 1.0f;
 	xRotate.m[1][1] = std::cos(((float)m_xRotate)*(3.14159f / 180.0f));
 	xRotate.m[1][2] = std::sin(((float)m_xRotate)*(3.14159f / 180.0f)) * -1.0f;
 	xRotate.m[2][1] = std::sin(((float)m_xRotate)*(3.14159f / 180.0f));
 	xRotate.m[2][2] = std::cos(((float)m_xRotate)*(3.14159f / 180.0f));
-	xRotate.m[3][3] = 1;
+	xRotate.m[3][3] = 1.0f;
 
 	//Setup yRotate matrix
 	yRotate.m[0][0] = std::cos(((float)m_yRotate)*(3.14159f / 180.0f));
 	yRotate.m[0][2] = std::sin(((float)m_yRotate)*(3.14159f / 180.0f));
-	yRotate.m[1][1] = 1;
+	yRotate.m[1][1] = 1.0f;
 	yRotate.m[2][0] = std::sin(((float)m_yRotate)*(3.14159f / 180.0f)) * -1.0f;
 	yRotate.m[2][2] = std::cos(((float)m_yRotate)*(3.14159f / 180.0f));
-	yRotate.m[3][3] = 1;
+	yRotate.m[3][3] = 1.0f;
 
 	//Setup zRotate matrix
 	zRotate.m[0][0] = std::cos(((float)m_zRotate)*(3.14159f / 180.0f));
 	zRotate.m[0][1] = std::sin(((float)m_zRotate)*(3.14159f / 180.0f)) * -1.0f;
 	zRotate.m[1][0] = std::sin(((float)m_zRotate)*(3.14159f / 180.0f));
 	zRotate.m[1][1] = std::cos(((float)m_zRotate)*(3.14159f / 180.0f));
-	zRotate.m[2][2] = 1;
-	zRotate.m[3][3] = 1;
+	zRotate.m[2][2] = 1.0f;
+	zRotate.m[3][3] = 1.0f;
 
 	//Matrix product all of them
 	result = multMatrix(scale, Translation);
@@ -305,12 +366,12 @@ void WindowOverlay::setExeName(const std::wstring& name)
 	m_exeName = name;
 }
 
-std::wstring WindowOverlay::getName()
+std::wstring WindowOverlay::getName() const
 {
 	return std::wstring(m_wndName);
 }
 
-std::wstring WindowOverlay::getExeName()
+std::wstring WindowOverlay::getExeName() const
 {
 	return std::wstring(m_exeName);
 }

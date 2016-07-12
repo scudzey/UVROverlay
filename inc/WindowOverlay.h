@@ -19,7 +19,7 @@ enum e_axis
 class WindowOverlay : public virtual Overlay
 {
 public:
-	WindowOverlay(OverlayTexture* d3dTexture);
+	WindowOverlay(OverlayTexture* d3dTexture, vr::IVRSystem *vrsys);
 	virtual ~WindowOverlay();
 	void setupThread();
 	virtual bool ShowOverlay();
@@ -33,14 +33,27 @@ public:
 	void setRotate(const int axis, const int value);
 	void setTrans(const int axis, const int value);
 
-	int getRotate(const int axis);
-	int getTrans(const int axis);
+	int getRotate(const int axis) const;
+	int getTrans(const int axis) const;
 
-	std::wstring getName();
-	std::wstring getExeName();
+	void setTracking(uint32_t device);
+	uint32_t getTracking() const;
+
+	void setScale(const int scale);
+	int getScale() const;
+
+	
+
+	std::wstring getName() const;
+	std::wstring getExeName() const;
 	void setName(const std::wstring& name);
 	void setExeName(const std::wstring& name);
 	void asyncUpdate();
+
+private:
+	void setOverlayTracking();
+	void updateTransform();
+	vr::HmdMatrix44_t multMatrix(vr::HmdMatrix44_t m1, vr::HmdMatrix44_t m2);
 
 private:
 	HWND m_targetHwnd;
@@ -50,9 +63,13 @@ private:
 	vr::HmdMatrix34_t m_overlayDistanceMtx;
 	vr::Texture_t m_texture;
 
-	void updateTransform();
+	vr::IVRSystem *m_vrSys;
 
-	vr::HmdMatrix44_t multMatrix(vr::HmdMatrix44_t m1, vr::HmdMatrix44_t m2);
+	int m_scale;
+
+	
+
+	uint32_t m_TrackedDevice;
 
 	//Position Values
 	int m_xRotate;
@@ -70,6 +87,7 @@ private:
 	boost::asio::deadline_timer m_timer;
 	boost::thread*				m_updateThread;
 	boost::mutex				mtx_;
+
 
 
 
