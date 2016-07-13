@@ -3,6 +3,7 @@ name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #pragma comment(lib, "Psapi.lib")
+#pragma comment(lib, "hid.lib")
 
 
 #include "StaticOverlay.h"
@@ -16,6 +17,11 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "../UniversalVROverlay/resource.h"
 #include <Psapi.h>
 #include <PathCch.h>
+
+extern "C"
+{
+#include <hidsdi.h>
+}
 
 #include <CommCtrl.h>
 
@@ -205,12 +211,108 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//overlay2->setOverlayMatrix(overlayDistanceMtx2);
 	//overlay2->ShowOverlay();
 
+	RAWINPUTDEVICE Rid[3];
+
+	Rid[0].usUsagePage = 0x01;
+	Rid[0].usUsage = 0x04;
+	Rid[0].dwFlags = RIDEV_INPUTSINK;                 // adds joystick
+	Rid[0].hwndTarget = hWnd;
+
+	//Rid[1].usUsagePage = 0x01;
+	//Rid[1].usUsage = 0x05;
+	//Rid[1].dwFlags = RIDEV_INPUTSINK;                 // adds game pad
+	//Rid[1].hwndTarget = hWnd;
+
+	Rid[1].usUsagePage = 0x01;
+	Rid[1].usUsage = 0x06;
+	Rid[1].dwFlags = RIDEV_NOLEGACY | RIDEV_INPUTSINK;                 // adds hid mouse
+	Rid[1].hwndTarget = hWnd;
+
+	//Rid[3].usUsagePage = 0x01;
+	//Rid[3].usUsage = 0x06;
+	//Rid[3].dwFlags = RIDEV_NOLEGACY | RIDEV_INPUTSINK;                 // adds hid keyboard
+	//Rid[3].hwndTarget = hWnd;
+
+	if (RegisterRawInputDevices(Rid, 2, sizeof(Rid[0])) == FALSE)
+	{
+		
+		MessageBox(NULL, L"Failed Raw", boost::lexical_cast<std::wstring>(GetLastError()).c_str(), MB_OK);
+		
+	}
+		
 
 	//------------------------------------------------------------------
 	// Main message loop:
 	
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
+		if (msg.message == WM_INPUT)
+		{
+			UINT dwSize;
+
+			GetRawInputData((HRAWINPUT)msg.lParam, RID_INPUT, NULL, &dwSize,
+				sizeof(RAWINPUTHEADER));
+			LPBYTE lpb = new BYTE[dwSize];
+			if (lpb == NULL)
+			{
+				return 0;
+			}
+
+			if (GetRawInputData((HRAWINPUT)msg.lParam, RID_INPUT, lpb, &dwSize,
+				sizeof(RAWINPUTHEADER)) != dwSize)
+				OutputDebugString(TEXT("GetRawInputData does not return correct size !\n"));
+
+			RAWINPUT* raw = (RAWINPUT*)lpb;
+
+			if (raw->header.dwType == RIM_TYPEKEYBOARD)
+			{
+				MessageBox(NULL, L"Test", L"Test", MB_OK);
+			}
+			if (raw->header.dwType == RIM_TYPEHID)
+			{
+				UINT bufferSize;
+				GetRawInputDeviceInfo(raw->header.hDevice, RIDI_PREPARSEDDATA, NULL, &bufferSize);
+				LPBYTE deviceInfo = new BYTE[bufferSize];
+				
+				//Add check for allocation
+				
+
+				//Get the HID preparsed data
+				GetRawInputDeviceInfo(raw->header.hDevice, RIDI_PREPARSEDDATA, deviceInfo, &bufferSize);
+				PHIDP_PREPARSED_DATA deviceInfoData = (PHIDP_PREPARSED_DATA)deviceInfo;
+				HIDP_CAPS caps;
+				HidP_GetCaps(deviceInfoData, &caps);
+
+				LPBYTE ButtonCapsBuf = new BYTE[sizeof(HIDP_BUTTON_CAPS) * caps.NumberInputButtonCaps];
+				//Add check for allocation
+
+				//Get the button capabilities from HID
+				PHIDP_BUTTON_CAPS ButtonCaps = (PHIDP_BUTTON_CAPS)ButtonCapsBuf;
+				USHORT capsLength = caps.NumberInputButtonCaps;
+				HidP_GetButtonCaps(HidP_Input, ButtonCaps, &capsLength, deviceInfoData);
+
+				
+				LPBYTE ValCapsBuf = new BYTE[sizeof(HIDP_BUTTON_CAPS) * caps.NumberInputValueCaps];
+
+				//Find the current button usage data from HID device
+				USAGE usage[128];
+				ULONG usageLength = ButtonCaps->Range.UsageMax - ButtonCaps->Range.UsageMin + 1;
+				HidP_GetUsages(HidP_Input, ButtonCaps->UsagePage, 0, usage, &usageLength, deviceInfoData, (PCHAR)raw->data.hid.bRawData, raw->data.hid.dwSizeHid);
+				for (int i = 0; i < usageLength; i++)
+				{
+					MessageBox(NULL, boost::lexical_cast<std::wstring>(usage[i] - ButtonCaps->Range.UsageMin).c_str(), L"Button Press", MB_OK);
+				}
+
+				//Clean up byte arrays;
+				delete[] ValCapsBuf;
+				delete[] ButtonCapsBuf;
+				delete[] deviceInfo;
+			}
+
+			//Clean up byte arrays;
+			delete[] lpb;
+				
+		}
 		if (msg.message == WM_QUIT)
 			break;
 		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -241,8 +343,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam)
 {
-	TCHAR title[500];
-	TCHAR wndTitle[500];
+	TCHAR title[500] = L"";
+	TCHAR wndTitle[500] = L"";
 	ZeroMemory(title, sizeof(title));
 
 	if (IsWindowVisible(hWnd))
@@ -258,7 +360,7 @@ BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam)
 		TCHAR *name = wcsrchr(title, L'\\');
 		
 		
-		if (GetWindowText(hWnd, wndTitle, 500) > 0)
+		if (GetWindowText(hWnd, wndTitle, 500) > 0 && name != NULL)
 		{
 			//--------------------------------------------------
 			wndVec.push_back(WindowDescriptor(hWnd, std::wstring(wndTitle), std::wstring(name)));
