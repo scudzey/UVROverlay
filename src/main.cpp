@@ -17,6 +17,10 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "../UniversalVROverlay/resource.h"
 #include <Psapi.h>
 #include <PathCch.h>
+#include <shellapi.h>
+
+#include "../UniversalVROverlay/mainwindow.h"
+#include <QApplication>
 
 extern "C"
 {
@@ -51,7 +55,13 @@ HWND OverlayTypeText, OverlayTypeBox;
 HWND KeybindText, KeybindBox;
 HWND xRotate, yRotate, zRotate;
 HWND xRotateText, yRotateText, zRotateText;
+
+
 HWND xTranslate, yTranslate, zTranslate;
+HWND xTranslateLeft, xTranslateRight, xTranslateLeftBig, xTranslateRightBig;
+HWND yTranslateUp, yTranslateDown, yTranslateUpBig, yTranslateDownBig;
+HWND zTranslateForward, zTranslateBack, zTranslateForwardBig, zTranslateBackBig;
+
 HWND xTranslateText, yTranslateText, zTranslateText;
 HWND scaleSlide;
 
@@ -92,6 +102,9 @@ void				setOptionsIndex();
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 
+	LPWSTR * szArgList;
+	int argCount;
+
 	//Test Version check to make sure it only runs on systems I authorize at compile time
 #if defined(TEST_VER) && defined(HDD_SERIAL)
 	unsigned long hd_serial = 0;
@@ -113,11 +126,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Initialize global strings
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadStringW(hInstance, IDC_WIN32PROJECT3, szWindowClass, MAX_LOADSTRING);
-	MyRegisterClass(hInstance);
-	hFont = CreateFont(
+
+
+	//szArgList = CommandLineToArgvW(GetCommandLine(), &argCount);
+	QApplication a(__argc, __argv);
+	MainWindow w;
+	w.show();
+	hWnd = (HWND)w.effectiveWinId();
+
+	
+	//MyRegisterClass(hInstance);
+	/*hFont = CreateFont(
 		14, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE, ANSI_CHARSET,
 		OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-		DEFAULT_PITCH | FF_DONTCARE, L"Arial");
+		DEFAULT_PITCH | FF_DONTCARE, L"Arial");*/
 
 	//Init d3d and manager
 	//TODO: add VR hooking to it's own class
@@ -125,10 +147,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 	// Perform application initialization:
-	if (!InitInstance(hInstance, nCmdShow))
+	/*if (!InitInstance(hInstance, nCmdShow))
 	{
 		return FALSE;
-	}
+	}*/
 	
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WIN32PROJECT3));
 
@@ -162,54 +184,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 	//Setup viewport
-	D3D11_VIEWPORT viewport;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
-	viewport.Width = static_cast<float>(1280);
-	viewport.Height = static_cast<float>(720);
-	viewport.MinDepth = D3D11_MIN_DEPTH;
-	viewport.MaxDepth = D3D11_MAX_DEPTH;
+	//D3D11_VIEWPORT viewport;
+	//viewport.TopLeftX = 0.0f;
+	//viewport.TopLeftY = 0.0f;
+	//viewport.Width = static_cast<float>(1280);
+	//viewport.Height = static_cast<float>(720);
+	//viewport.MinDepth = D3D11_MIN_DEPTH;
+	//viewport.MaxDepth = D3D11_MAX_DEPTH;
 
-	//D3D11
-	env->getContext()->RSSetViewports(1, &viewport);
-
-	
-
-	//-----Overlay Config-----------------------------------------------	
-	EnumWindows(EnumProc, 0);
-
-	//WindowOverlay* overlay = new WindowOverlay(overlayTexture);
-	//overlay->setHwnd(targethWnd);
-
-	//WindowOverlay* overlay2 = new WindowOverlay(overlayTexture2);
-	//overlay2->setHwnd(targethWnd2);
-
-	
-	//mgr->addOverlay(overlay);
-	//mgr->addOverlay(overlay2);
-
-	vr::HmdMatrix34_t overlayDistanceMtx;
-	memset(&overlayDistanceMtx, 0, sizeof(overlayDistanceMtx));
-	overlayDistanceMtx.m[0][0] = overlayDistanceMtx.m[1][1] = overlayDistanceMtx.m[2][2] = 1.0f;
-	overlayDistanceMtx.m[2][0] = 1.0f;
-	overlayDistanceMtx.m[0][3] = 0.8f;
-	overlayDistanceMtx.m[1][3] = -.5f;
-	overlayDistanceMtx.m[2][3] = -1.0f;
-
-
-	//overlay->setOverlayMatrix(overlayDistanceMtx);
-	//overlay->ShowOverlay();
-
-	vr::HmdMatrix34_t overlayDistanceMtx2;
-	memset(&overlayDistanceMtx2, 0, sizeof(overlayDistanceMtx2));
-	overlayDistanceMtx2.m[0][0] = overlayDistanceMtx2.m[1][1] = overlayDistanceMtx2.m[2][2] = 1.0f;
-	overlayDistanceMtx2.m[2][0] = -1.0f;
-	overlayDistanceMtx2.m[0][3] = -0.8f;
-	overlayDistanceMtx2.m[1][3] = 0.5f;
-	overlayDistanceMtx2.m[2][3] = -1.0f;
-
-	//overlay2->setOverlayMatrix(overlayDistanceMtx2);
-	//overlay2->ShowOverlay();
+	////D3D11
+	//env->getContext()->RSSetViewports(1, &viewport);
 
 	RAWINPUTDEVICE Rid[3];
 
@@ -243,7 +227,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	//------------------------------------------------------------------
 	// Main message loop:
-	
+	return a.exec();
+
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
 		if (msg.message == WM_INPUT)
@@ -298,12 +283,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				USAGE usage[128];
 				ULONG usageLength = ButtonCaps->Range.UsageMax - ButtonCaps->Range.UsageMin + 1;
 				HidP_GetUsages(HidP_Input, ButtonCaps->UsagePage, 0, usage, &usageLength, deviceInfoData, (PCHAR)raw->data.hid.bRawData, raw->data.hid.dwSizeHid);
-				for (int i = 0; i < usageLength; i++)
+
+
+				GetRawInputDeviceInfo(raw->header.hDevice, RIDI_DEVICENAME, NULL, &bufferSize);
+				LPBYTE deviceNameInfoBuf = new BYTE[sizeof(wchar_t) * bufferSize];
+
+				//Add check for allocation
+
+
+				//Get the HID Name
+				GetRawInputDeviceInfo(raw->header.hDevice, RIDI_DEVICENAME, deviceNameInfoBuf, &bufferSize);
+
+				wchar_t DeviceName[127];
+				HANDLE HIDHandle = CreateFile((LPCWSTR)deviceNameInfoBuf, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
+				if (HIDHandle)
 				{
-					MessageBox(NULL, boost::lexical_cast<std::wstring>(usage[i] - ButtonCaps->Range.UsageMin).c_str(), L"Button Press", MB_OK);
+					HidD_GetProductString(HIDHandle, DeviceName, sizeof(wchar_t) * 126);
+					CloseHandle(HIDHandle);
+					for (int i = 0; i < usageLength; i++)
+					{
+						MessageBox(NULL, boost::lexical_cast<std::wstring>(usage[i] - ButtonCaps->Range.UsageMin).c_str(), std::wstring(DeviceName).c_str(), MB_OK);
+					}
 				}
+				
 
 				//Clean up byte arrays;
+				delete[] deviceNameInfoBuf;
 				delete[] ValCapsBuf;
 				delete[] ButtonCapsBuf;
 				delete[] deviceInfo;
@@ -364,17 +369,6 @@ BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam)
 		{
 			//--------------------------------------------------
 			wndVec.push_back(WindowDescriptor(hWnd, std::wstring(wndTitle), std::wstring(name)));
-			
-			if (lstrcmpW(name, L"\\vlc.exe") == 0)
-			{
-				//MessageBox(NULL, name, name, MB_OK);
-				targethWnd = hWnd;
-			}
-			if (lstrcmpW(name, L"\\Discord.exe") == 0)
-			{
-				//MessageBox(NULL, name, name, MB_OK);
-				targethWnd2 = hWnd;
-			}
 		}
 
 		//--------------------------------------------------
@@ -630,7 +624,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			NULL,
 			TRACKBAR_CLASSW,
 			L"Test",
-			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			//WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			WS_CHILD | WS_TABSTOP,
 			10, 200,
 			175, 18,
 			SettingsStatic, NULL,
@@ -638,11 +633,101 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			NULL);
 		SendMessage(xTranslate, TBM_SETRANGE, TRUE, MAKELONG(-100, 100));
 
+		//X-Translate Buttons
+		xTranslateLeft = CreateWindowEx(
+			NULL,
+			L"Button",
+			L"<",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+			35, 220,
+			25, 25,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		xTranslateLeftBig = CreateWindowEx(
+			NULL,
+			L"Button",
+			L"<<",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+			10, 220,
+			25, 25,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+
+		xTranslateRight = CreateWindowEx(
+			NULL,
+			L"Button",
+			L">",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+			135, 220,
+			25, 25,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		xTranslateRightBig = CreateWindowEx(
+			NULL,
+			L"Button",
+			L">>",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+			160, 220,
+			25, 25,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+
+		//Y-Translate Buttons
+		yTranslateUp = CreateWindowEx(
+			NULL,
+			L"Button",
+			L"^",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+			85, 200,
+			25, 25,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		yTranslateUpBig = CreateWindowEx(
+			NULL,
+			L"Button",
+			L"^\n^",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+			85, 175,
+			25, 25,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+
+		yTranslateDown = CreateWindowEx(
+			NULL,
+			L"Button",
+			L"V",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+			85, 250,
+			25, 25,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+		yTranslateDownBig = CreateWindowEx(
+			NULL,
+			L"Button",
+			L"V\nV",
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+			85, 275,
+			25, 25,
+			SettingsStatic, NULL,
+			hInst,
+			NULL);
+
+		
+		
+
 		yTranslate = CreateWindowEx(
 			NULL,
 			TRACKBAR_CLASSW,
 			L"Test",
-			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			//WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			WS_CHILD | WS_TABSTOP,
 			10, 230,
 			175, 18,
 			SettingsStatic, NULL,
@@ -654,7 +739,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			NULL,
 			TRACKBAR_CLASSW,
 			L"Test",
-			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			//WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			WS_CHILD | WS_TABSTOP,
 			10, 260,
 			175, 18,
 			SettingsStatic, NULL,
