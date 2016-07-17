@@ -22,7 +22,7 @@ struct VertexType
 class RenderEnvironment
 {
 public:
-	RenderEnvironment(int32_t adapterIndex);
+	RenderEnvironment(int32_t adapterIndex, HWND hWnd);
 	virtual ~RenderEnvironment();
 	ID3D11Device* getDevice();
 	ID3D11DeviceContext * getContext();

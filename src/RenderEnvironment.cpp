@@ -1,6 +1,6 @@
 #include "RenderEnvironment.h"
 
-RenderEnvironment::RenderEnvironment(int32_t adapterIndex)
+RenderEnvironment::RenderEnvironment(int32_t adapterIndex, HWND hWnd)
 {
 	HRESULT err;
 

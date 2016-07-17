@@ -85,6 +85,18 @@
     <ClCompile Include="GeneratedFiles\Test\moc_mainwindow.cpp">
       <Filter>Generated Files\Test</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_windowselect.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_windowselect.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Test\moc_windowselect.cpp">
+      <Filter>Generated Files\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="windowselect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UniversalVROverlay.rc">
@@ -135,9 +147,18 @@
     <CustomBuild Include="mainwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="windowselect.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="windowselect.ui">
+      <Filter>UI Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_mainwindow.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_windowselect.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

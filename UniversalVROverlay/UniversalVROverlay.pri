@@ -18,7 +18,8 @@ HEADERS += ../inc/RenderEnvironment.h \
     ./resource.h \
     ./stdafx.h \
     ./WindowDescriptor.h \
-    ./mainwindow.h
+    ./mainwindow.h \
+    ./windowselect.h
 SOURCES += ../src/RenderEnvironment.cpp \
     ../src/OverlayTexture.cpp \
     ../src/main.cpp \
@@ -26,8 +27,10 @@ SOURCES += ../src/RenderEnvironment.cpp \
     ../src/StaticOverlay.cpp \
     ../src/VertexObject.cpp \
     ../src/WindowOverlay.cpp \
+    ./main2.cpp \
+    ./mainwindow.cpp \
     ./OverlayManagerFormView.cpp \
     ./WindowDescriptor.cpp \
-    ./main2.cpp \
-    ./mainwindow.cpp
-FORMS += ./mainwindow.ui
+    ./windowselect.cpp
+FORMS += ./mainwindow.ui \
+    ./windowselect.ui

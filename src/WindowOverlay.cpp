@@ -10,6 +10,7 @@ WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture, vr::IVRSystem* vrsys)
 	, m_timer(m_io, boost::posix_time::millisec(17))
 	, m_TrackedDevice(1) //Set to track to head by default
 	, m_vrSys(vrsys)
+	, m_scale(100)
 {
 	memset(&m_overlayDistanceMtx, 0, sizeof(m_overlayDistanceMtx));
 	m_timer.async_wait(boost::bind(&WindowOverlay::asyncUpdate, this));
@@ -196,6 +197,7 @@ void WindowOverlay::updateTexture()
 void WindowOverlay::setScale(const int scale)
 {
 	m_scale = scale;
+	updateTransform();
 }
 int WindowOverlay::getScale() const {
 	return m_scale;
@@ -292,7 +294,7 @@ void WindowOverlay::updateTransform()
 	//Setup Scale (Currently fixed)
 	scale.m[0][0] = (float)m_scale / 100.0f; //X Scale
 	scale.m[1][1] = (float)m_scale / 100.0f; //Y Scale
-	scale.m[2][2] = (float)m_scale / 100.0f; //Z Scale fixed
+	scale.m[2][2] = (float)m_scale / 100.0f; //Z Scale
 	scale.m[3][3] = 1.0f; //unused
 
 

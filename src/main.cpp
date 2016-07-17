@@ -129,10 +129,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 	//szArgList = CommandLineToArgvW(GetCommandLine(), &argCount);
-	QApplication a(__argc, __argv);
-	MainWindow w;
-	w.show();
-	hWnd = (HWND)w.effectiveWinId();
+	
 
 	
 	//MyRegisterClass(hInstance);
@@ -169,28 +166,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	//----Overlay D3dInit-----------------------------------------------
 
-
-
-	int32_t adapterIndex;
-	pVRSystem->GetDXGIOutputInfo(&adapterIndex);
-
-	env = new RenderEnvironment(adapterIndex);
+	
+	//env = new RenderEnvironment(adapterIndex);
 	mgr = new OverlayManager();
+	QApplication a(__argc, __argv);
+	MainWindow w(0,mgr, pVRSystem);
+	w.show();
+	hWnd = (HWND)w.effectiveWinId();
+
 	
 	
-	OverlayTexture* overlayTexture = new OverlayTexture(env);
-	OverlayTexture* overlayTexture2 = new OverlayTexture(env);
 
-
-
+	
+		
 	//Setup viewport
-	//D3D11_VIEWPORT viewport;
-	//viewport.TopLeftX = 0.0f;
-	//viewport.TopLeftY = 0.0f;
-	//viewport.Width = static_cast<float>(1280);
-	//viewport.Height = static_cast<float>(720);
-	//viewport.MinDepth = D3D11_MIN_DEPTH;
-	//viewport.MaxDepth = D3D11_MAX_DEPTH;
+	/*D3D11_VIEWPORT viewport;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	viewport.Width = static_cast<float>(1280);
+	viewport.Height = static_cast<float>(720);
+	viewport.MinDepth = D3D11_MIN_DEPTH;
+	viewport.MaxDepth = D3D11_MAX_DEPTH;*/
 
 	////D3D11
 	//env->getContext()->RSSetViewports(1, &viewport);
@@ -217,13 +213,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//Rid[3].dwFlags = RIDEV_NOLEGACY | RIDEV_INPUTSINK;                 // adds hid keyboard
 	//Rid[3].hwndTarget = hWnd;
 
-	if (RegisterRawInputDevices(Rid, 2, sizeof(Rid[0])) == FALSE)
+	/*if (RegisterRawInputDevices(Rid, 2, sizeof(Rid[0])) == FALSE)
 	{
 		
 		MessageBox(NULL, L"Failed Raw", boost::lexical_cast<std::wstring>(GetLastError()).c_str(), MB_OK);
 		
 	}
-		
+		*/
 
 	//------------------------------------------------------------------
 	// Main message loop:
@@ -342,7 +338,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			mgr->getOverlays()[selectedIndex]->setTracking(SendMessage(controllerCombo, CB_GETCURSEL, 0, 0));
 		}
 	}
-	_CrtDumpMemoryLeaks();
 	return (int)msg.wParam;
 }
 
@@ -364,17 +359,12 @@ BOOL CALLBACK EnumProc(HWND hWnd, LPARAM lParam)
 		
 		TCHAR *name = wcsrchr(title, L'\\');
 		
-		
 		if (GetWindowText(hWnd, wndTitle, 500) > 0 && name != NULL)
 		{
 			//--------------------------------------------------
 			wndVec.push_back(WindowDescriptor(hWnd, std::wstring(wndTitle), std::wstring(name)));
 		}
-
 		//--------------------------------------------------
-
-		
-
 		CloseHandle(hProcess);
 		
 	}
