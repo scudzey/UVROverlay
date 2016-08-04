@@ -42,6 +42,11 @@ public:
 	void setScale(const int scale);
 	int getScale() const;
 
+	unsigned int getWidth() const;
+	unsigned int getHeight() const;
+
+	vr::VROverlayHandle_t getOverlayHandle() const;
+
 	
 
 	std::wstring getName() const;
@@ -49,6 +54,8 @@ public:
 	void setName(const std::wstring& name);
 	void setExeName(const std::wstring& name);
 	void asyncUpdate();
+
+	bool isVisible() const;
 
 private:
 	void setOverlayTracking();
@@ -88,7 +95,10 @@ private:
 	boost::thread*				m_updateThread;
 	boost::mutex				mtx_;
 
+	unsigned int m_texWidth;
+	unsigned int m_texHeight;
 
+	bool m_isVisible;
 
 
 };

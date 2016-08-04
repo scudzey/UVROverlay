@@ -67,6 +67,8 @@ void MainWindow::on_overlayList_itemSelectionChanged()
 	ui->scaleSlider->setValue(selectedOverlay->getScale());
 	ui->scaleText->setText(QString::number(selectedOverlay->getScale()));
 
+	ui->trackingSelect->setCurrentIndex(selectedOverlay->getTracking());
+
 
 }
 

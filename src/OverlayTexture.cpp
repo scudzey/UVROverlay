@@ -9,6 +9,52 @@ OverlayTexture::OverlayTexture(RenderEnvironment* d3dEnvObj)
 	
 }
 
+OverlayTexture::~OverlayTexture()
+{
+	m_d3dEnv->lockD3D();
+	if (m_texVal)
+	{
+		m_texVal->Release();
+		m_texVal = NULL;
+	}
+
+	if (m_presentTex)
+	{
+		m_presentTex->Release();
+		m_presentTex = NULL;
+	}
+
+	if (m_resource)
+	{
+		m_resource->Release();
+		m_resource = NULL;
+	}
+	if (m_presentResource)
+	{
+		m_presentResource->Release();
+		m_presentResource = NULL;
+	}
+
+	if (m_surface)
+	{
+		m_surface->Release();
+		m_surface = NULL;
+	}
+
+	if (m_view)
+	{
+		m_view->Release();
+		m_view = NULL;
+	}
+
+	if (m_buffer)
+	{
+		m_buffer->Release();
+		m_buffer = NULL;
+	}
+	m_d3dEnv->unlockD3d();
+}
+
 void OverlayTexture::GenerateTexture(unsigned int width, unsigned int height)
 {
 	//TODO: Refactor this into a helper class
@@ -75,6 +121,7 @@ bool OverlayTexture::setTextureFromWindow(HWND targetHWND, int x, int y)
 	BitBlt(textureDC, 0, 0, x, y, targetDC, 0, 0, SRCCOPY);
 	m_surface->ReleaseDC(NULL);
 	m_surface->Release();
+	m_surface = NULL;
 	ReleaseDC(targetHWND, targetDC);
 
 	m_d3dEnv->getContext()->PSSetShaderResources(0, 1, &m_resource);
@@ -101,6 +148,4 @@ ID3D11Texture2D* OverlayTexture::getTexture()
 }
 
 
-OverlayTexture::~OverlayTexture()
-{
-}
+

@@ -11,6 +11,7 @@ WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture, vr::IVRSystem* vrsys)
 	, m_TrackedDevice(1) //Set to track to head by default
 	, m_vrSys(vrsys)
 	, m_scale(100)
+	, m_isVisible(false)
 {
 	memset(&m_overlayDistanceMtx, 0, sizeof(m_overlayDistanceMtx));
 	m_timer.async_wait(boost::bind(&WindowOverlay::asyncUpdate, this));
@@ -19,6 +20,20 @@ WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture, vr::IVRSystem* vrsys)
 
 WindowOverlay::~WindowOverlay()
 {
+	if (m_updateThread)
+	{
+		m_updateThread->join();
+		delete m_updateThread;
+		m_updateThread = NULL;
+	}
+
+	if (m_OverlayTexture)
+	{
+		delete m_OverlayTexture;
+		m_OverlayTexture = NULL;
+	}
+
+
 }
 
 void WindowOverlay::setupThread()
@@ -45,8 +60,10 @@ bool WindowOverlay::ShowOverlay()
 		{
 			return false;
 		}
-		int x = rect.right - rect.left;
-		int y = rect.bottom - rect.top;
+		unsigned int x = rect.right - rect.left;
+		unsigned int y = rect.bottom - rect.top;
+		m_texWidth = x;
+		m_texHeight = y;
 		m_OverlayTexture->GenerateTexture(x, y);
 		m_OverlayTexture->setTextureFromWindow(m_targetHwnd, x, y);
 
@@ -71,8 +88,10 @@ bool WindowOverlay::ShowOverlay()
 		//Show the overlay
 		overlayError = vr::VROverlay()->ShowOverlay(m_ulOverlayHandle);
 		bSuccess = overlayError == vr::VROverlayError_None;
+		m_isVisible = true;
 		m_updateThread = new boost::thread(&WindowOverlay::setupThread, this);
 	}
+
 	return bSuccess;
 }
 
@@ -91,6 +110,8 @@ void WindowOverlay::HideOverlay()
 	m_updateThread->join();
 	delete m_updateThread;
 	m_updateThread = NULL;
+
+	m_isVisible = false;
 }
 
 void WindowOverlay::handleEvent(const vr::VREvent_t & event)
@@ -118,6 +139,10 @@ void WindowOverlay::setOverlayTracking()
 		return;
 	}
 
+
+	//TODO: remove this and just use the controller value set by the main window
+	//main window will enumerate the controllers to select from and pass the selection to the overlay
+	//Still check to make sure that the device class is a controller and if it fails revert to spacial display and reset position.
 	for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++)
 	{
 		switch (m_vrSys->GetTrackedDeviceClass(i))
@@ -151,6 +176,11 @@ void WindowOverlay::asyncUpdate()
 	updateTexture();
 	m_timer.expires_from_now(boost::posix_time::milliseconds(17));
 	m_timer.async_wait(boost::bind(&WindowOverlay::asyncUpdate, this));
+}
+
+bool WindowOverlay::isVisible() const
+{
+	return m_isVisible;
 }
 
 void WindowOverlay::updateTexture()
@@ -203,9 +233,32 @@ int WindowOverlay::getScale() const {
 	return m_scale;
 }
 
+unsigned int WindowOverlay::getWidth() const
+{
+	return m_texWidth;
+}
+unsigned int WindowOverlay::getHeight() const
+{
+	return m_texHeight;
+}
+
+vr::VROverlayHandle_t WindowOverlay::getOverlayHandle() const
+{
+	return m_ulOverlayHandle;
+}
+
 void WindowOverlay::setOverlayMatrix(const vr::HmdMatrix34_t & relativePosition)
 {
 	m_overlayDistanceMtx = relativePosition;
+
+	m_xTrans = m_overlayDistanceMtx.m[0][3]*25.0f*(m_scale/100.0f);
+	m_yTrans = m_overlayDistanceMtx.m[1][3] * 25.0f*(m_scale / 100.0f);
+	m_zTrans = m_overlayDistanceMtx.m[2][3] * 25.0f*(m_scale / 100.0f);
+
+	m_xRotate = std::atan2(m_overlayDistanceMtx.m[2][1], m_overlayDistanceMtx.m[2][2]) * (180.0f / 3.14159f);
+	m_yRotate = std::atan2(-m_overlayDistanceMtx.m[2][0], std::sqrt((m_overlayDistanceMtx.m[2][1] * m_overlayDistanceMtx.m[2][1]) +
+																	(m_overlayDistanceMtx.m[2][2] * m_overlayDistanceMtx.m[2][2]))) * (180.0f / 3.14159f);
+	m_zRotate = std::atan2(m_overlayDistanceMtx.m[1][0], m_overlayDistanceMtx.m[0][0]) * (180.0f / 3.14159f);
 }
 
 boost::uuids::uuid WindowOverlay::getOverlayUuid() const
@@ -303,9 +356,9 @@ void WindowOverlay::updateTransform()
 	Translation.m[1][1] = 1.0f;
 	Translation.m[2][2] = 1.0f;
 	Translation.m[2][2] = 1.0f;
-	Translation.m[0][3] = (float)(m_xTrans) / 25.0f;
-	Translation.m[1][3] = (float)(m_yTrans) / 25.0f;
-	Translation.m[2][3] = (float)(m_zTrans) / 25.0f;
+	Translation.m[0][3] = ((float)(m_xTrans) / 25.0f) / scale.m[0][0];
+	Translation.m[1][3] = ((float)(m_yTrans) / 25.0f) / scale.m[0][0];
+	Translation.m[2][3] = ((float)(m_zTrans) / 25.0f) / scale.m[0][0];
 	Translation.m[3][3] = 1.0f;
 
 	//Setup xRotate matrix

@@ -102,9 +102,6 @@ void				setOptionsIndex();
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 
-	LPWSTR * szArgList;
-	int argCount;
-
 	//Test Version check to make sure it only runs on systems I authorize at compile time
 #if defined(TEST_VER) && defined(HDD_SERIAL)
 	unsigned long hd_serial = 0;

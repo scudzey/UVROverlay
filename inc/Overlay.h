@@ -24,6 +24,8 @@ public:
 	virtual void setRotate(const int axis, const int value)=0;
 	virtual void setTrans(const int axis, const int value)=0;
 
+	virtual vr::VROverlayHandle_t getOverlayHandle() const = 0;
+
 	virtual void setScale(const int scale) = 0;
 	virtual int getScale() const =0;
 
@@ -38,5 +40,10 @@ public:
 
 	virtual std::wstring getName() const =0;
 	virtual void setName(const std::wstring& name)=0 ;
+
+	virtual unsigned int getWidth() const = 0;
+	virtual unsigned int getHeight() const = 0;
+
+	virtual bool isVisible() const = 0;
 };
 
