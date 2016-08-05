@@ -7,38 +7,51 @@ WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture, vr::IVRSystem* vrsys)
 	, m_targetHwnd(NULL)
 	, m_overlayUID(boost::uuids::random_generator()())
 	, m_updateThread(NULL)
-	, m_timer(m_io, boost::posix_time::millisec(17))
+	, m_io(boost::in_place())
+	, m_timer( boost::in_place(boost::ref(m_io.get()), boost::posix_time::millisec(17)))
 	, m_TrackedDevice(1) //Set to track to head by default
 	, m_vrSys(vrsys)
 	, m_scale(100)
 	, m_isVisible(false)
 {
 	memset(&m_overlayDistanceMtx, 0, sizeof(m_overlayDistanceMtx));
-	m_timer.async_wait(boost::bind(&WindowOverlay::asyncUpdate, this));
+	m_timer->async_wait(boost::bind(&WindowOverlay::asyncUpdate, this));
 }
 
 
 WindowOverlay::~WindowOverlay()
 {
+	boost::lock_guard<boost::mutex> guard(mtx_);
+	//hide the overlay, destroying it
+	HideOverlay();
+	m_io->stop();
+	m_io->reset();
+	//Clean up thread;
 	if (m_updateThread)
 	{
+		
 		m_updateThread->join();
 		delete m_updateThread;
 		m_updateThread = NULL;
 	}
+	//m_io = boost::none;
 
+	//Clean up texture;
 	if (m_OverlayTexture)
 	{
 		delete m_OverlayTexture;
 		m_OverlayTexture = NULL;
 	}
+	m_timer = boost::none;
+	m_io = boost::none;
+	
 
 
 }
 
 void WindowOverlay::setupThread()
 {
-	m_io.run();
+	m_io->run();
 }
 
 bool WindowOverlay::ShowOverlay()
@@ -89,6 +102,7 @@ bool WindowOverlay::ShowOverlay()
 		overlayError = vr::VROverlay()->ShowOverlay(m_ulOverlayHandle);
 		bSuccess = overlayError == vr::VROverlayError_None;
 		m_isVisible = true;
+		//m_updateThread = new boost::thread(&WindowOverlay::setupThread, this);
 		m_updateThread = new boost::thread(&WindowOverlay::setupThread, this);
 	}
 
@@ -101,15 +115,18 @@ void WindowOverlay::HideOverlay()
 		return;
 
 	vr::VRCompositor();  // Required to call overlays...
-	vr::VROverlay()->HideOverlay(m_ulOverlayHandle);
-	vr::VROverlay()->DestroyOverlay(m_ulOverlayHandle);
-	m_ulOverlayHandle = vr::k_ulOverlayHandleInvalid;
-	m_io.stop();
+	//vr::VROverlay()->HideOverlay(m_ulOverlayHandle);
+	
+	m_io->stop();
 
 	//Stop Thread and cleanup
 	m_updateThread->join();
 	delete m_updateThread;
 	m_updateThread = NULL;
+
+	vr::VROverlay()->ClearOverlayTexture(m_ulOverlayHandle);
+	vr::VROverlay()->DestroyOverlay(m_ulOverlayHandle);
+	m_ulOverlayHandle = vr::k_ulOverlayHandleInvalid;
 
 	m_isVisible = false;
 }
@@ -156,7 +173,7 @@ void WindowOverlay::setOverlayTracking()
 			else if (first && m_TrackedDevice == 2)
 			{
 				controller = i;
-			}
+			} 
 			else if (!first && m_TrackedDevice == 3)
 			{
 				controller = i;
@@ -173,9 +190,10 @@ void WindowOverlay::setOverlayTracking()
 
 void WindowOverlay::asyncUpdate()
 {
+	
 	updateTexture();
-	m_timer.expires_from_now(boost::posix_time::milliseconds(17));
-	m_timer.async_wait(boost::bind(&WindowOverlay::asyncUpdate, this));
+	m_timer->expires_from_now(boost::posix_time::milliseconds(17));
+	m_timer->async_wait(boost::bind(&WindowOverlay::asyncUpdate, this));
 }
 
 bool WindowOverlay::isVisible() const
@@ -214,14 +232,11 @@ void WindowOverlay::updateTexture()
 
 	//Release OpenVR texture reference
 	vr::VROverlay()->ReleaseNativeOverlayHandle(m_ulOverlayHandle, (void*)shaderResource);
-	//shaderResource->Release();
+
 	shaderResource = NULL;
 
 
-	//vr::VROverlay()->SetOverlayTransformTrackedDeviceRelative(m_ulOverlayHandle, vr::k_unTrackedDeviceIndex_Hmd, &m_overlayDistanceMtx);
 	setOverlayTracking();
-	//vr::VROverlay()->ShowOverlay(m_ulOverlayHandle);
-
 }
 
 void WindowOverlay::setScale(const int scale)

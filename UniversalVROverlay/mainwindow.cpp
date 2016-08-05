@@ -30,6 +30,15 @@ void MainWindow::show()
 void MainWindow::on_remOverlayButton_clicked()
 {
     //Remove Overlay from manager and delete overlay
+	int selectedIndex = ui->overlayList->currentRow();
+	
+	if (selectedIndex >= 0)
+	{
+		ui->overlayList->takeItem(selectedIndex);
+		m_mgr->delOverlay(selectedIndex);
+		
+	}
+
 }
 
 
@@ -48,26 +57,30 @@ void MainWindow::on_overlayList_itemSelectionChanged()
 {
     //Fillout Overlay settings groupbox
 	int selectedIndex = ui->overlayList->currentRow();
-	std::shared_ptr<Overlay> selectedOverlay = m_mgr->getOverlays()[selectedIndex];
-	ui->titleBox->setText(QString::fromWCharArray(selectedOverlay->getName().c_str()));
+	if (selectedIndex >= 0)
+	{
+		std::shared_ptr<Overlay> selectedOverlay = m_mgr->getOverlays()[selectedIndex];
+		ui->titleBox->setText(QString::fromWCharArray(selectedOverlay->getName().c_str()));
 
-	ui->xTranslationText->setText(QString::number(selectedOverlay->getTrans(X_AXIS)));
-	ui->yTranslationText->setText(QString::number(selectedOverlay->getTrans(Y_AXIS)));
-	ui->zTranslationText->setText(QString::number(selectedOverlay->getTrans(Z_AXIS)));
+		ui->xTranslationText->setText(QString::number(selectedOverlay->getTrans(X_AXIS)));
+		ui->yTranslationText->setText(QString::number(selectedOverlay->getTrans(Y_AXIS)));
+		ui->zTranslationText->setText(QString::number(selectedOverlay->getTrans(Z_AXIS)));
 
-	ui->xRotationSlider->setValue(selectedOverlay->getRotate(X_AXIS));
-	ui->xRotateText->setText(QString::number(selectedOverlay->getRotate(X_AXIS)));
+		ui->xRotationSlider->setValue(selectedOverlay->getRotate(X_AXIS));
+		ui->xRotateText->setText(QString::number(selectedOverlay->getRotate(X_AXIS)));
+
+		ui->yRotationSlider->setValue(selectedOverlay->getRotate(Y_AXIS));
+		ui->yRotateText->setText(QString::number(selectedOverlay->getRotate(Y_AXIS)));
+
+		ui->zRotationSlizer->setValue(selectedOverlay->getRotate(Z_AXIS));
+		ui->zRotateText->setText(QString::number(selectedOverlay->getRotate(Z_AXIS)));
+
+		ui->scaleSlider->setValue(selectedOverlay->getScale());
+		ui->scaleText->setText(QString::number(selectedOverlay->getScale()));
+
+		ui->trackingSelect->setCurrentIndex(selectedOverlay->getTracking());
+	}
 	
-	ui->yRotationSlider->setValue(selectedOverlay->getRotate(Y_AXIS));
-	ui->yRotateText->setText(QString::number(selectedOverlay->getRotate(Y_AXIS)));
-	
-	ui->zRotationSlizer->setValue(selectedOverlay->getRotate(Z_AXIS));
-	ui->zRotateText->setText(QString::number(selectedOverlay->getRotate(Z_AXIS)));
-
-	ui->scaleSlider->setValue(selectedOverlay->getScale());
-	ui->scaleText->setText(QString::number(selectedOverlay->getScale()));
-
-	ui->trackingSelect->setCurrentIndex(selectedOverlay->getTracking());
 
 
 }
@@ -83,8 +96,9 @@ void MainWindow::on_xRotationSlider_sliderMoved(int position)
 	if (selectedIndex >= 0)
 	{
 		m_mgr->getOverlays()[selectedIndex]->setRotate(X_AXIS, ui->xRotationSlider->value());
+		ui->xRotateText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getRotate(X_AXIS)));
 	}
-	ui->xRotateText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getRotate(X_AXIS)));
+	
 }
 
 void MainWindow::on_yRotationSlider_sliderMoved(int position)
@@ -93,8 +107,9 @@ void MainWindow::on_yRotationSlider_sliderMoved(int position)
 	if (selectedIndex >= 0)
 	{
 		m_mgr->getOverlays()[selectedIndex]->setRotate(Y_AXIS, ui->yRotationSlider->value());
+		ui->yRotateText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getRotate(Y_AXIS)));
 	}
-	ui->yRotateText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getRotate(Y_AXIS)));
+	
 }
 
 void MainWindow::on_zRotationSlizer_sliderMoved(int position)
@@ -103,8 +118,9 @@ void MainWindow::on_zRotationSlizer_sliderMoved(int position)
 	if (selectedIndex >= 0)
 	{
 		m_mgr->getOverlays()[selectedIndex]->setRotate(Z_AXIS, ui->zRotationSlizer->value());
+		ui->zRotateText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getRotate(Z_AXIS)));
 	}
-	ui->zRotateText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getRotate(Z_AXIS)));
+	
 }
 
 void MainWindow::on_scaleSlider_sliderMoved(int position)
@@ -113,8 +129,9 @@ void MainWindow::on_scaleSlider_sliderMoved(int position)
 	if (selectedIndex >= 0)
 	{
 		m_mgr->getOverlays()[selectedIndex]->setScale(ui->scaleSlider->value());
+		ui->scaleText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getScale()));
 	}
-	ui->scaleText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getScale()));
+	
 }
 
 void MainWindow::on_trackingSelect_currentIndexChanged(int index)
@@ -141,7 +158,7 @@ void MainWindow::on_xRotateText_editingFinished()
 		m_mgr->getOverlays()[selectedIndex]->setRotate(X_AXIS, value);
 		ui->xRotationSlider->setValue(value);
 	}
-	else
+	else if (selectedIndex >= 0)
 	{
 		ui->xRotateText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getRotate(X_AXIS)));
 	}
@@ -163,7 +180,7 @@ void MainWindow::on_yRotateText_editingFinished()
 		m_mgr->getOverlays()[selectedIndex]->setRotate(Y_AXIS, value);
 		ui->yRotationSlider->setValue(value);
 	}
-	else
+	else if (selectedIndex >= 0)
 	{
 		ui->yRotateText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getRotate(Y_AXIS)));
 	}
@@ -184,7 +201,7 @@ void MainWindow::on_zRotateText_editingFinished()
 		m_mgr->getOverlays()[selectedIndex]->setRotate(Z_AXIS, value);
 		ui->zRotationSlizer->setValue(value);
 	}
-	else
+	else if (selectedIndex >= 0)
 	{
 		ui->zRotateText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getRotate(Z_AXIS)));
 	}
@@ -204,7 +221,7 @@ void MainWindow::on_xTranslationText_editingFinished()
 	{
 		m_mgr->getOverlays()[selectedIndex]->setTrans(X_AXIS, value);
 	}
-	else
+	else if (selectedIndex >= 0)
 	{
 		ui->xTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(X_AXIS)));
 	}
@@ -224,7 +241,7 @@ void MainWindow::on_yTranslationText_editingFinished()
 	{
 		m_mgr->getOverlays()[selectedIndex]->setTrans(Y_AXIS, value);
 	}
-	else
+	else if (selectedIndex >= 0)
 	{
 		ui->yTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS)));
 	}
@@ -244,7 +261,7 @@ void MainWindow::on_zTranslationText_editingFinished()
 	{
 		m_mgr->getOverlays()[selectedIndex]->setTrans(Z_AXIS, value);
 	}
-	else
+	else if (selectedIndex >= 0)
 	{
 		ui->zTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS)));
 	}
@@ -265,7 +282,7 @@ void MainWindow::on_scaleText_editingFinished()
 		m_mgr->getOverlays()[selectedIndex]->setScale(value);
 		ui->scaleSlider->setValue(value);
 	}
-	else
+	else if (selectedIndex >= 0)
 	{
 		ui->scaleText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getScale()));
 	}
@@ -300,8 +317,9 @@ void MainWindow::on_zTranslateBackBig_clicked()
 	{
 		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS);
 		m_mgr->getOverlays()[selectedIndex]->setTrans(Z_AXIS, transValue - 1.0f);
+		ui->zTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS)));
 	}
-	ui->zTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS)));
+	
 }
 
 

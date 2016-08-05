@@ -73,18 +73,7 @@ void OverlayTexture::GenerateTexture(unsigned int width, unsigned int height)
 	td.Usage = D3D11_USAGE_DEFAULT;
 	td.MiscFlags = D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
 
-	UINT32 *pixels = new UINT32[width * height];
-	for (int y = 0; y < width * height; ++y)
-	{
-		pixels[y] = 0xffffffff;
-	}
-	D3D11_SUBRESOURCE_DATA srd;
-	memset(&srd, 0, sizeof(srd));
-	srd.pSysMem = (void *)pixels;
-	srd.SysMemPitch = width * 4;
-	srd.SysMemSlicePitch = 0;
-
-	if (FAILED(err = m_d3dEnv->getDevice()->CreateTexture2D(&td, &srd, &m_texVal)))
+	if (FAILED(err = m_d3dEnv->getDevice()->CreateTexture2D(&td, NULL, &m_texVal)))
 	{
 		return;
 	}

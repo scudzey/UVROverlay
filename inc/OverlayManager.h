@@ -22,6 +22,7 @@ public:
 
 	void addOverlay(Overlay* overlayObj);
 	void updateOverlays();
+	void delOverlay(int index);
 
 	const std::vector<std::shared_ptr<Overlay>>& getOverlays() const;
 
@@ -36,6 +37,7 @@ private:
 	boost::asio::io_service m_io;
 	boost::asio::deadline_timer m_timer;
 	boost::thread*				m_updateThread;
+	boost::mutex				mtx_;
 };
 
 

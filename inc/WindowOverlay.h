@@ -2,6 +2,10 @@
 
 #include "Overlay.h"
 #include <boost/thread.hpp>
+#include <boost/optional.hpp>
+#include <boost/utility/in_place_factory.hpp>
+#include <boost/utility.hpp>
+
 #include <D3D11_1.h>
 #include <D3DX11.h>
 #include <DXGI.h>
@@ -90,8 +94,8 @@ private:
 	std::wstring  m_wndName;
 	std::wstring  m_exeName;
 
-	boost::asio::io_service m_io;
-	boost::asio::deadline_timer m_timer;
+	boost::optional<boost::asio::io_service> m_io;
+	boost::optional<boost::asio::deadline_timer> m_timer;
 	boost::thread*				m_updateThread;
 	boost::mutex				mtx_;
 

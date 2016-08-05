@@ -27,6 +27,7 @@ OverlayManager::~OverlayManager()
 
 void OverlayManager::addOverlay(Overlay* overlayObj)
 {
+	boost::lock_guard<boost::mutex> guard(mtx_);
 	m_overlayVec.push_back(std::shared_ptr<Overlay>(overlayObj));
 }
 
@@ -36,6 +37,14 @@ void OverlayManager::updateOverlays()
 	{
 		(*it)->updateTexture();
 	}
+}
+
+void OverlayManager::delOverlay(int index)
+{
+	boost::lock_guard<boost::mutex> guard(mtx_);
+	
+	m_overlayVec.erase(m_overlayVec.begin() + index);
+
 }
 
 const std::vector<std::shared_ptr<Overlay>>& OverlayManager::getOverlays() const
@@ -56,6 +65,8 @@ void OverlayManager::sendEvent(const vr::VREvent_t& event)
 
 void OverlayManager::asyncUpdate()
 {
+	boost::lock_guard<boost::mutex> guard(mtx_);
+	
 	vr::TrackedDeviceIndex_t controller1 = -1;
 	vr::TrackedDeviceIndex_t controller2 = -1;
 
@@ -75,9 +86,13 @@ void OverlayManager::asyncUpdate()
 	float padding = 0.5f;
 
 	//Find the controllers
+	vr::IVRSystem* vrSys = vr::VRSystem();
+	vr::IVRCompositor* vrComp = vr::VRCompositor();
+	vr::IVROverlay* vrOvrly = vr::VROverlay();
+
 	for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++)
 	{
-		switch (vr::VRSystem()->GetTrackedDeviceClass(i))
+		switch (vrSys->GetTrackedDeviceClass(i))
 		{
 		case vr::TrackedDeviceClass_Controller:
 			if (controller1 == -1)
@@ -94,31 +109,30 @@ void OverlayManager::asyncUpdate()
 			}
 		}
 	}
-
+	
 	
 
 	for (std::vector<std::shared_ptr<Overlay>>::iterator it = m_overlayVec.begin(); it != m_overlayVec.end(); ++it)
 	{
-		if (vr::VRSystem() && controller1 >= 0 && (*it)->isVisible())
+		if (vrSys && controller1 >= 0 && (*it)->isVisible())
 		{
 			//Get the controller pose information relative to tracking space
-			vr::VRSystem()->GetControllerStateWithPose(vr::VRCompositor()->GetTrackingSpace(), controller1, &controller1State, &controller1Pose);
+			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller1, &controller1State, &controller1Pose);
 			//overlayCenter.v[0] = (*it)->getWidth() / 2;
 			//overlayCenter.v[1] = (*it)->getHeight() / 2;
-			vr::VROverlay()->GetOverlayTextureSize((*it)->getOverlayHandle(), &width, &height);
+			//vrOvrly->GetOverlayTextureSize((*it)->getOverlayHandle(), &width, &height);
 			
 			overlayCenter.v[0] = 0.5f * ((float)(*it)->getScale() / 100.0f);
 			overlayCenter.v[1] = 0.5f * ((float)(*it)->getScale() / 100.0f);
 
 			//Get the overlay transform relative to tracking space
 			vr::EVROverlayError err = vr::VROverlayError_None;
-			if (err = vr::VROverlay()->GetTransformForOverlayCoordinates((*it)->getOverlayHandle(), vr::VRCompositor()->GetTrackingSpace(), overlayCenter, &overlayTransform))
+			if (err = vrOvrly->GetTransformForOverlayCoordinates((*it)->getOverlayHandle(), vrComp->GetTrackingSpace(), overlayCenter, &overlayTransform))
 			{
 				DBOUT("Error with overlay!!" << err << std::endl);
 			}
 			//vr::VROverlay()->GetOverlayTransformAbsolute((*it)->getOverlayHandle(), &origin, &overlayTransform);
-			DBOUT("Controller Pose: " << controller1Pose.mDeviceToAbsoluteTracking.m[0][3] << " " << controller1Pose.mDeviceToAbsoluteTracking.m[1][3] << " " << controller1Pose.mDeviceToAbsoluteTracking.m[2][3] << std::endl);
-			DBOUT("Overlay Pose: " << overlayTransform.m[0][3] << " " << overlayTransform.m[1][3] << " " << overlayTransform.m[2][3] << std::endl);
+			
 
 			//If the controller is within the bounds the center of the overlay
 			if ((controller1Pose.mDeviceToAbsoluteTracking.m[0][3] > (overlayTransform.m[0][3] - padding) && controller1Pose.mDeviceToAbsoluteTracking.m[0][3] < (overlayTransform.m[0][3] + padding)) &&
@@ -127,11 +141,10 @@ void OverlayManager::asyncUpdate()
 				)
 			{
 				//Buzz controller
-				DBOUT( "In area: " << controller1 << std::endl );
+				
 				vr::VRSystem()->TriggerHapticPulse(controller1, 0, 20);
 				if (controller1State.rAxis[1].x > 0.75f)
 				{
-					DBOUT("MOVING!!" << std::endl);
 					(*it)->setOverlayMatrix(controller1Pose.mDeviceToAbsoluteTracking);
 				}
 				
