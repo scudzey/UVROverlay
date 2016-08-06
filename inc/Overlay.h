@@ -20,6 +20,7 @@ public:
 	virtual void handleEvent(const vr::VREvent_t& event) = 0;
 	virtual void updateTexture() = 0;
 	virtual void setOverlayMatrix(const vr::HmdMatrix34_t& relativePosition) = 0;
+	virtual vr::HmdMatrix34_t getOverlayMatrix() const = 0;
 	virtual boost::uuids::uuid getOverlayUuid() const = 0;
 	virtual void setRotate(const int axis, const int value)=0;
 	virtual void setTrans(const int axis, const int value)=0;
@@ -46,4 +47,19 @@ public:
 
 	virtual bool isVisible() const = 0;
 };
+
+//overlay helper functions
+
+vr::HmdMatrix44_t multMatrix(vr::HmdMatrix44_t m1, vr::HmdMatrix44_t m2)
+{
+	vr::HmdMatrix44_t result;
+	memset(&result, 0, sizeof(result));
+
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			for (int k = 0; k < 4; k++)
+				result.m[i][j] += m1.m[i][k] * m2.m[k][j];
+
+	return result;
+}
 

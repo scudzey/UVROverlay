@@ -262,6 +262,11 @@ vr::VROverlayHandle_t WindowOverlay::getOverlayHandle() const
 	return m_ulOverlayHandle;
 }
 
+vr::HmdMatrix34_t WindowOverlay::getOverlayMatrix() const
+{
+	return m_overlayDistanceMtx;
+}
+
 void WindowOverlay::setOverlayMatrix(const vr::HmdMatrix34_t & relativePosition)
 {
 	m_overlayDistanceMtx = relativePosition;
@@ -413,18 +418,7 @@ void WindowOverlay::updateTransform()
 		}
 }
 
-vr::HmdMatrix44_t WindowOverlay::multMatrix(vr::HmdMatrix44_t m1, vr::HmdMatrix44_t m2)
-{
-	vr::HmdMatrix44_t result;
-	memset(&result, 0, sizeof(result));
 
-	for (int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
-			for (int k = 0; k < 4; k++)
-				result.m[i][j] += m1.m[i][k] * m2.m[k][j];
-
-	return result;
-}
 
 void WindowOverlay::setName(const std::wstring& name)
 {

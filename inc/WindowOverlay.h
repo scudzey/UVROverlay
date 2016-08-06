@@ -50,6 +50,7 @@ public:
 	unsigned int getHeight() const;
 
 	vr::VROverlayHandle_t getOverlayHandle() const;
+	vr::HmdMatrix34_t getOverlayMatrix() const;
 
 	
 
@@ -64,7 +65,6 @@ public:
 private:
 	void setOverlayTracking();
 	void updateTransform();
-	vr::HmdMatrix44_t multMatrix(vr::HmdMatrix44_t m1, vr::HmdMatrix44_t m2);
 
 private:
 	HWND m_targetHwnd;
