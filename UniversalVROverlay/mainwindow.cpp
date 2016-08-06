@@ -334,7 +334,6 @@ void MainWindow::on_zTranslateBackBig_clicked()
 
 
 
-
 bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* result)
 {
 	MSG *msg = static_cast<MSG *>(message);

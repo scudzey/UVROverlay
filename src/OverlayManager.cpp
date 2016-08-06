@@ -66,7 +66,7 @@ void OverlayManager::sendEvent(const vr::VREvent_t& event)
 void OverlayManager::asyncUpdate()
 {
 	boost::lock_guard<boost::mutex> guard(mtx_);
-	
+
 	vr::TrackedDeviceIndex_t controller1 = -1;
 	vr::TrackedDeviceIndex_t controller2 = -1;
 
@@ -83,9 +83,11 @@ void OverlayManager::asyncUpdate()
 
 	vr::ETrackingUniverseOrigin origin;
 
+	
+
 	unsigned int width, height;
 
-	float padding = 0.5f;
+	float padding = 0.1f;
 
 	//Find the controllers
 	vr::IVRSystem* vrSys = vr::VRSystem();
@@ -101,7 +103,7 @@ void OverlayManager::asyncUpdate()
 			{
 				controller1 = i;
 			}
-			if (controller1 >= 0)
+			if (controller1 >= 0 && i !=controller1)
 			{
 				controller2 = i;
 			}
@@ -111,8 +113,8 @@ void OverlayManager::asyncUpdate()
 			}
 		}
 	}
-	
-	
+
+
 
 	for (std::vector<std::shared_ptr<Overlay>>::iterator it = m_overlayVec.begin(); it != m_overlayVec.end(); ++it)
 	{
@@ -122,10 +124,8 @@ void OverlayManager::asyncUpdate()
 			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller1, &controller1State, &controller1Pose);
 			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller2, &controller2State, &controller2Pose);
 			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), vr::k_unTrackedDeviceIndex_Hmd, &hmdState, &hmdPose);
-			//overlayCenter.v[0] = (*it)->getWidth() / 2;
-			//overlayCenter.v[1] = (*it)->getHeight() / 2;
-			//vrOvrly->GetOverlayTextureSize((*it)->getOverlayHandle(), &width, &height);
-			
+
+			//Center of the overlay adjusted for scale
 			overlayCenter.v[0] = 0.5f * ((float)(*it)->getScale() / 100.0f);
 			overlayCenter.v[1] = 0.5f * ((float)(*it)->getScale() / 100.0f);
 
@@ -135,102 +135,57 @@ void OverlayManager::asyncUpdate()
 			{
 				DBOUT("Error with overlay!!" << err << std::endl);
 			}
-			//vr::VROverlay()->GetOverlayTransformAbsolute((*it)->getOverlayHandle(), &origin, &overlayTransform);
-			
+
+			//Boolean values for which controller is inside an overlay
+			bool controller1InOverlay = ((controller1Pose.mDeviceToAbsoluteTracking.m[0][3] > (overlayTransform.m[0][3] - padding) && controller1Pose.mDeviceToAbsoluteTracking.m[0][3] < (overlayTransform.m[0][3] + padding)) &&
+				(controller1Pose.mDeviceToAbsoluteTracking.m[1][3] > (overlayTransform.m[1][3] - padding) && controller1Pose.mDeviceToAbsoluteTracking.m[1][3] < (overlayTransform.m[1][3] + padding)) &&
+				(controller1Pose.mDeviceToAbsoluteTracking.m[2][3] > (overlayTransform.m[2][3] - padding) && controller1Pose.mDeviceToAbsoluteTracking.m[2][3] < (overlayTransform.m[2][3] + padding)));
+
+			bool controller2InOverlay = ((controller2Pose.mDeviceToAbsoluteTracking.m[0][3] > (overlayTransform.m[0][3] - padding) && controller2Pose.mDeviceToAbsoluteTracking.m[0][3] < (overlayTransform.m[0][3] + padding)) &&
+				(controller2Pose.mDeviceToAbsoluteTracking.m[1][3] > (overlayTransform.m[1][3] - padding) && controller2Pose.mDeviceToAbsoluteTracking.m[1][3] < (overlayTransform.m[1][3] + padding)) &&
+				(controller2Pose.mDeviceToAbsoluteTracking.m[2][3] > (overlayTransform.m[2][3] - padding) && controller2Pose.mDeviceToAbsoluteTracking.m[2][3] < (overlayTransform.m[2][3] + padding)));
 
 			//If the controller is within the bounds the center of the overlay
-			if ((controller1Pose.mDeviceToAbsoluteTracking.m[0][3] > (overlayTransform.m[0][3] - padding) && controller1Pose.mDeviceToAbsoluteTracking.m[0][3] < (overlayTransform.m[0][3] + padding)) &&
-				(controller1Pose.mDeviceToAbsoluteTracking.m[1][3] > (overlayTransform.m[1][3] - padding) && controller1Pose.mDeviceToAbsoluteTracking.m[1][3] < (overlayTransform.m[1][3] + padding)) &&
-				(controller1Pose.mDeviceToAbsoluteTracking.m[2][3] > (overlayTransform.m[2][3] - padding) && controller1Pose.mDeviceToAbsoluteTracking.m[2][3] < (overlayTransform.m[2][3] + padding))
-				)
+			if (controller1InOverlay || controller2InOverlay)
 			{
-				//Buzz controller
-				
+				//Buzz controller  -- Not working fix
 				vr::VRSystem()->TriggerHapticPulse(controller1, 2, 2000);
-				if (controller1State.rAxis[1].x > 0.75f)
+
+				if (controller1InOverlay && (*it)->getTracking() != 2)
 				{
-					//controller1Pose.vAngularVelocity
-					if ((*it)->getTracking() == 0)
+					//If controller1 is not currently tracking and controller2 isn't tracking overlay
+					if(controller1State.rAxis[1].x > 0.75f && (m_controller1Tracking == NULL || m_controller1Tracking == (*it).get()) && m_controller2Tracking != (*it).get())
 					{
-						(*it)->setOverlayMatrix(controller1Pose.mDeviceToAbsoluteTracking);
+						TrackingUpdate(it, controller1State, controller1Pose, controller1InOverlay, vrSys, vrComp);
+						m_controller1Tracking = (*it).get();
 					}
-					else
+
+					//If trigger is released and was tracking, reset pointer to null;
+					if (controller1State.rAxis[1].x < 0.75f && m_controller1Tracking != NULL)
 					{
-						//Must be same sized for matrix inverse calculation
-						boost::numeric::ublas::matrix<float> trackedSource(4, 4);
-						boost::numeric::ublas::matrix<float> invertedSource(4, 4);
-						boost::numeric::ublas::matrix<float> controllerTransform(4, 4);
-						boost::numeric::ublas::matrix<float> newTransform(4, 4);
-						vr::HmdMatrix34_t newPosition;
-						memset(&newPosition, 0, sizeof(vr::HmdMatrix34_t));
-
-						//HMD Calculation
-						if ((*it)->getTracking() == 1)
-						{
-
-							//Populate boost matrices
-							for (unsigned i = 0; i < trackedSource.size1(); ++i)
-							{
-								for (unsigned j = 0; j < trackedSource.size2(); ++j)
-								{
-									if (i < 3)
-									{
-										trackedSource(i, j) = hmdPose.mDeviceToAbsoluteTracking.m[i][j];
-										controllerTransform(i, j) = controller1Pose.mDeviceToAbsoluteTracking.m[i][j];
-									}
-									//Handle out of bound values for new 4x4 matrix
-									else
-									{
-										if (j == 3)
-										{
-											trackedSource(i, j) = 1;
-											controllerTransform(i, j) = 1;
-										}
-										else
-										{
-											trackedSource(i, j) = 0;
-											controllerTransform(i, j) = 0;
-										}
-									}
-								}
-							}
-							//Invert Matrix and create new transform product from controller
-							InvertMatrix(trackedSource, invertedSource);
-							newTransform = boost::numeric::ublas::prod(invertedSource, controllerTransform);
-							
-							//Copy values from the new matrix into the openVR matrix
-							for (unsigned i = 0; i < newTransform.size1(); ++i)
-							{
-								for (unsigned j = 0; j < newTransform.size2(); ++j)
-								{
-									if (i < 3)
-									{
-										newPosition.m[i][j] = newTransform(i, j);
-									}
-								}
-							}
-
-						}
-						//Controller 1 Calculation
-						if ((*it)->getTracking() == 2)
-						{
-
-						}
-						//Controller 2 Calculation
-						if ((*it)->getTracking() == 3)
-						{
-
-						}
-
-						(*it)->setOverlayMatrix(newPosition);
-
+						m_controller1Tracking = NULL;
 					}
 					
 				}
+				if (controller2InOverlay && (*it)->getTracking() != 3)
+				{
+					//If controller2 is not currently tracking and controller1 isn't tracking overlay			
+					if (controller2State.rAxis[1].x > 0.75f && (m_controller2Tracking == NULL || m_controller2Tracking == (*it).get()) && m_controller1Tracking != (*it).get())
+					{
+						TrackingUpdate(it, controller2State, controller2Pose, controller2InOverlay, vrSys, vrComp);
+						m_controller2Tracking = (*it).get();
+					}
+					if (controller2State.rAxis[1].x < 0.75f && m_controller2Tracking != NULL)
+					{
+						m_controller2Tracking = NULL;
+					}
+				}
 				
-			}
-		}
-	}
+			} //end controller in overlay if check
+
+		} //end VR check if
+	} //end iterator loop for overlays 
+
 
 
 	m_timer.expires_from_now(boost::posix_time::milliseconds(20));
@@ -242,4 +197,121 @@ void OverlayManager::setupThread()
 	m_io.run();
 }
 
+
+void OverlayManager::TrackingUpdate(std::vector<std::shared_ptr<Overlay>>::iterator it, vr::VRControllerState_t controllerState, vr::TrackedDevicePose_t controllerPose, bool controllerInOverlay, vr::IVRSystem* vrSys, vr::IVRCompositor* vrComp)
+{
+	vr::TrackedDeviceIndex_t controller1 = -1;
+	vr::TrackedDeviceIndex_t controller2 = -1;
+
+	vr::VRControllerState_t hmdState;
+	vr::VRControllerState_t controller1State;
+	vr::VRControllerState_t controller2State;
+
+	vr::TrackedDevicePose_t hmdPose;
+	vr::TrackedDevicePose_t controller1Pose;
+	vr::TrackedDevicePose_t controller2Pose;
+
+	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller1, &controller1State, &controller1Pose);
+	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller2, &controller2State, &controller2Pose);
+	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), vr::k_unTrackedDeviceIndex_Hmd, &hmdState, &hmdPose);
+
+	for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++)
+	{
+		switch (vrSys->GetTrackedDeviceClass(i))
+		{
+		case vr::TrackedDeviceClass_Controller:
+			if (controller1 == -1)
+			{
+				controller1 = i;
+			}
+			if (controller1 >= 0 && i != controller1)
+			{
+				controller2 = i;
+			}
+			if (controller2 >= 0)
+			{
+				break;
+			}
+		}
+	}
+
+
+	if (controllerInOverlay) //controller trigger squeezed, in overlay and not being tracked to controller1
+	{
+		if ((*it)->getTracking() == 0)
+		{
+			(*it)->setOverlayMatrix(controllerPose.mDeviceToAbsoluteTracking);
+		}
+		else
+		{
+			//Must be same sized for matrix inverse calculation
+			boost::numeric::ublas::matrix<float> trackedSource(4, 4);
+			boost::numeric::ublas::matrix<float> invertedSource(4, 4);
+			boost::numeric::ublas::matrix<float> controllerTransform(4, 4);
+			boost::numeric::ublas::matrix<float> newTransform(4, 4);
+			vr::HmdMatrix34_t newPosition;
+			memset(&newPosition, 0, sizeof(vr::HmdMatrix34_t));
+
+			//HMD Calculation
+
+
+			//Populate boost matrices
+			for (unsigned i = 0; i < trackedSource.size1(); ++i)
+			{
+				for (unsigned j = 0; j < trackedSource.size2(); ++j)
+				{
+					if (i < 3)
+					{
+						if ((*it)->getTracking() == 1)
+						{
+							trackedSource(i, j) = hmdPose.mDeviceToAbsoluteTracking.m[i][j];
+						}
+						if ((*it)->getTracking() == 2)
+						{
+							trackedSource(i, j) = controller1Pose.mDeviceToAbsoluteTracking.m[i][j];
+						}
+						if ((*it)->getTracking() == 3)
+						{
+							trackedSource(i, j) = controller2Pose.mDeviceToAbsoluteTracking.m[i][j];
+						}
+						controllerTransform(i, j) = controllerPose.mDeviceToAbsoluteTracking.m[i][j];
+					}
+					//Handle out of bound values for new 4x4 matrix
+					else
+					{
+						if (j == 3)
+						{
+							trackedSource(i, j) = 1;
+							controllerTransform(i, j) = 1;
+						}
+						else
+						{
+							trackedSource(i, j) = 0;
+							controllerTransform(i, j) = 0;
+						}
+					}
+				} //End Column loop
+			}  //End Row loop
+
+			   //Invert Matrix and create new transform product from controller
+			InvertMatrix(trackedSource, invertedSource);
+			newTransform = boost::numeric::ublas::prod(invertedSource, controllerTransform);
+
+			//Copy values from the new matrix into the openVR matrix
+			for (unsigned i = 0; i < newTransform.size1(); ++i)
+			{
+				for (unsigned j = 0; j < newTransform.size2(); ++j)
+				{
+					if (i < 3)
+					{
+						newPosition.m[i][j] = newTransform(i, j);
+					}
+				} // end column loop
+			} //end row loop
+
+			(*it)->setOverlayMatrix(newPosition);
+		} // end else (tracking check for non-spacial tracking)
+
+	} //end controller check
+}
 

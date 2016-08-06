@@ -64,7 +64,13 @@ public:
 
 	void asyncUpdate();
 	void setupThread();
+
 	
+
+private:
+	//Update overlay tracking
+	void TrackingUpdate(std::vector<std::shared_ptr<Overlay>>::iterator it, vr::VRControllerState_t controllerState, vr::TrackedDevicePose_t controllerPose, bool controllerInOverlay, vr::IVRSystem* vrSys, vr::IVRCompositor* vrComp);
+
 private:
 	std::vector<std::shared_ptr<Overlay>> m_overlayVec;
 
@@ -72,6 +78,9 @@ private:
 	boost::asio::deadline_timer m_timer;
 	boost::thread*				m_updateThread;
 	boost::mutex				mtx_;
+
+	Overlay* m_controller1Tracking = NULL;
+	Overlay* m_controller2Tracking = NULL;
 };
 
 
