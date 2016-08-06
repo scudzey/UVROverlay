@@ -316,7 +316,7 @@ void MainWindow::on_zTranslateBackBig_clicked()
 	if (selectedIndex >= 0)
 	{
 		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS);
-		m_mgr->getOverlays()[selectedIndex]->setTrans(Z_AXIS, transValue - 1.0f);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(Z_AXIS, transValue - 3.0f);
 		ui->zTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS)));
 	}
 	
@@ -429,3 +429,124 @@ bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* r
 }
 
 
+
+void MainWindow::on_zTranslateBack_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(Z_AXIS, transValue - 1.0f);
+		ui->zTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS)));
+	}
+}
+
+void MainWindow::on_zTranslateForward_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(Z_AXIS, transValue + 1.0f);
+		ui->zTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS)));
+	}
+}
+
+void MainWindow::on_zTranslateForwardBig_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(Z_AXIS, transValue + 3.0f);
+		ui->zTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Z_AXIS)));
+	}
+}
+
+void MainWindow::on_xTranslateLeftBig_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(X_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(X_AXIS, transValue - 3.0f);
+		ui->xTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(X_AXIS)));
+	}
+}
+
+void MainWindow::on_xTranslateLeft_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(X_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(X_AXIS, transValue - 1.0f);
+		ui->xTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(X_AXIS)));
+	}
+}
+
+void MainWindow::on_xTranslateRight_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(X_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(X_AXIS, transValue + 1.0f);
+		ui->xTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(X_AXIS)));
+	}
+}
+
+void MainWindow::on_xTranslateRightBig_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(X_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(X_AXIS, transValue + 3.0f);
+		ui->xTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(X_AXIS)));
+	}
+}
+
+void MainWindow::on_yTranslateUpBig_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(Y_AXIS, transValue + 3.0f);
+		ui->yTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS)));
+	}
+}
+
+void MainWindow::on_yTranslateUp_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(Y_AXIS, transValue + 1.0f);
+		ui->yTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS)));
+	}
+}
+
+void MainWindow::on_yTranslateDown_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(Y_AXIS, transValue - 1.0f);
+		ui->yTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS)));
+	}
+}
+
+void MainWindow::on_yTranslateDownBig_clicked()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS);
+		m_mgr->getOverlays()[selectedIndex]->setTrans(Y_AXIS, transValue - 3.0f);
+		ui->yTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS)));
+	}
+}

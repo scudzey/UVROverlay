@@ -69,6 +69,28 @@ private slots:
 
     void on_zTranslateBackBig_clicked();
 
+    void on_zTranslateBack_clicked();
+
+    void on_zTranslateForward_clicked();
+
+    void on_zTranslateForwardBig_clicked();
+
+    void on_xTranslateLeftBig_clicked();
+
+    void on_xTranslateLeft_clicked();
+
+    void on_xTranslateRight_clicked();
+
+    void on_xTranslateRightBig_clicked();
+
+    void on_yTranslateUpBig_clicked();
+
+    void on_yTranslateUp_clicked();
+
+    void on_yTranslateDown_clicked();
+
+    void on_yTranslateDownBig_clicked();
+
 private:
 	bool nativeEvent(const QByteArray& eventType, void* message, long *result);
     Ui::MainWindow *ui;
