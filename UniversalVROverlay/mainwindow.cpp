@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent, OverlayManager* mgr, vr::IVRSystem* vrSy
 	m_vrSystem(vrSystem)
 {
     ui->setupUi(this);
+	QObject::connect(mgr, SIGNAL(textureUpdated(int)), this, SLOT(on_textureUpdate(int)));
 	
 }
 
@@ -59,8 +60,34 @@ void MainWindow::on_overlayList_itemSelectionChanged()
 	int selectedIndex = ui->overlayList->currentRow();
 	if (selectedIndex >= 0)
 	{
+		
 		std::shared_ptr<Overlay> selectedOverlay = m_mgr->getOverlays()[selectedIndex];
 		ui->titleBox->setText(QString::fromWCharArray(selectedOverlay->getName().c_str()));
+
+		ui->xTranslationText->blockSignals(true);
+		ui->yTranslationText->blockSignals(true);
+		ui->zTranslationText->blockSignals(true);
+
+		ui->xRotationSlider->blockSignals(true);
+		ui->xRotateText->blockSignals(true);
+
+		ui->yRotationSlider->blockSignals(true);
+		ui->yRotateText->blockSignals(true);
+
+		ui->zRotationSlizer->blockSignals(true);
+		ui->zRotateText->blockSignals(true);
+
+		ui->scaleSlider->blockSignals(true);
+		ui->scaleText->blockSignals(true);
+
+		ui->trackingSelect->blockSignals(true);
+
+		ui->rateSelect->blockSignals(true);
+
+		ui->transparancySlider->blockSignals(true);
+		ui->transparancyText->blockSignals(true);
+
+		//-------------------------------------------------
 
 		ui->xTranslationText->setText(QString::number(selectedOverlay->getTrans(X_AXIS)));
 		ui->yTranslationText->setText(QString::number(selectedOverlay->getTrans(Y_AXIS)));
@@ -79,6 +106,38 @@ void MainWindow::on_overlayList_itemSelectionChanged()
 		ui->scaleText->setText(QString::number(selectedOverlay->getScale()));
 
 		ui->trackingSelect->setCurrentIndex(selectedOverlay->getTracking());
+
+		
+		ui->rateSelect->setCurrentIndex(selectedOverlay->getRate());
+		
+
+		ui->transparancySlider->setValue(selectedOverlay->getTransparancy());
+		ui->transparancyText->setText(QString::number(selectedOverlay->getTransparancy()));
+
+		//-------------------------------------------------
+
+		ui->xTranslationText->blockSignals(false);
+		ui->yTranslationText->blockSignals(false);
+		ui->zTranslationText->blockSignals(false);
+
+		ui->xRotationSlider->blockSignals(false);
+		ui->xRotateText->blockSignals(false);
+
+		ui->yRotationSlider->blockSignals(false);
+		ui->yRotateText->blockSignals(false);
+
+		ui->zRotationSlizer->blockSignals(false);
+		ui->zRotateText->blockSignals(false);
+
+		ui->scaleSlider->blockSignals(false);
+		ui->scaleText->blockSignals(false);
+
+		ui->trackingSelect->blockSignals(false);
+
+		ui->rateSelect->blockSignals(false);
+
+		ui->transparancySlider->blockSignals(false);
+		ui->transparancyText->blockSignals(false);
 	}
 	
 
@@ -548,5 +607,51 @@ void MainWindow::on_yTranslateDownBig_clicked()
 		float transValue = m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS);
 		m_mgr->getOverlays()[selectedIndex]->setTrans(Y_AXIS, transValue - 3.0f);
 		ui->yTranslationText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTrans(Y_AXIS)));
+	}
+}
+
+void MainWindow::on_rateSelect_currentIndexChanged(int index)
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		m_mgr->getOverlays()[selectedIndex]->setRate(ui->rateSelect->currentIndex());
+	}
+}
+
+void MainWindow::on_transparancySlider_sliderMoved(int position)
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	if (selectedIndex >= 0)
+	{
+		m_mgr->getOverlays()[selectedIndex]->setTransparancy(ui->transparancySlider->value());
+		ui->transparancyText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTransparancy()));
+	}
+}
+
+void MainWindow::on_textureUpdate(int index)
+{
+	if (index == ui->overlayList->currentRow())
+		on_overlayList_itemSelectionChanged();
+}
+
+void MainWindow::on_transparancyText_editingFinished()
+{
+	int selectedIndex = ui->overlayList->currentRow();
+	bool ok;
+	int value;
+
+	value = ui->transparancyText->text().toInt(&ok);
+
+
+
+	if (selectedIndex >= 0 && ok)
+	{
+		m_mgr->getOverlays()[selectedIndex]->setTransparancy(value);
+		ui->transparancySlider->setValue(value);
+	}
+	else if (selectedIndex >= 0)
+	{
+		ui->transparancyText->setText(QString::number(m_mgr->getOverlays()[selectedIndex]->getTransparancy()));
 	}
 }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>726</width>
-    <height>498</height>
+    <height>548</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>726</width>
-    <height>498</height>
+    <height>548</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>726</width>
-    <height>498</height>
+    <height>548</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -38,7 +38,7 @@
       <x>0</x>
       <y>30</y>
       <width>291</width>
-      <height>441</height>
+      <height>491</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -80,7 +80,7 @@
       <x>300</x>
       <y>24</y>
       <width>421</width>
-      <height>448</height>
+      <height>498</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -553,7 +553,7 @@
        </rect>
       </property>
       <property name="maximum">
-       <number>102</number>
+       <number>101</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -609,6 +609,103 @@
       <item>
        <property name="text">
         <string>Controller 2</string>
+       </property>
+      </item>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_7">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>440</y>
+       <width>241</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Tansparancy</string>
+     </property>
+     <widget class="QSlider" name="transparancySlider">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>171</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>101</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="transparancyText">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>20</y>
+        <width>41</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_8">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>440</y>
+       <width>151</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Refresh Rate</string>
+     </property>
+     <widget class="QComboBox" name="rateSelect">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>131</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>1 FPS</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>5 FPS</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>10 FPS</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>24 FPS</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>30 FPS</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>50 FPS</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>60 FPS</string>
        </property>
       </item>
      </widget>

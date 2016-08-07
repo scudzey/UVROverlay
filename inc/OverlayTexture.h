@@ -26,6 +26,9 @@ private:
 	ID3D11RenderTargetView *m_view;
 	ID3D11Buffer* m_buffer;
 	boost::mutex mtx_;
+
+	unsigned int m_curWidth;
+	unsigned int m_curHeight;
 	
 
 };

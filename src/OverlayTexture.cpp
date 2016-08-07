@@ -5,6 +5,8 @@
 
 OverlayTexture::OverlayTexture(RenderEnvironment* d3dEnvObj)
 	:m_d3dEnv(d3dEnvObj)
+	, m_curHeight(0)
+	, m_curWidth(0)
 {
 	
 }
@@ -60,6 +62,8 @@ void OverlayTexture::GenerateTexture(unsigned int width, unsigned int height)
 	//TODO: Refactor this into a helper class
 	HRESULT err;
 
+	
+
 	//Construct the texture description
 	D3D11_TEXTURE2D_DESC td;
 	memset(&td, 0, sizeof(td));
@@ -86,19 +90,37 @@ void OverlayTexture::GenerateTexture(unsigned int width, unsigned int height)
 	resourceDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	resourceDesc.Texture2D.MipLevels = 1;
 #ifdef _DEBUG
-	m_texVal->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof("displayTexture") - 1, "displayTexture");
+	//m_texVal->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof("displayTexture") - 1, "displayTexture");
 #endif
 	
 	if (FAILED(err = m_d3dEnv->getDevice()->CreateShaderResourceView(m_texVal, NULL, &m_resource)))
 	{
 		return;
 	}
+
+	m_curWidth = width;
+	m_curHeight = height;
 }
 
 bool OverlayTexture::setTextureFromWindow(HWND targetHWND, int x, int y)
 {
 	HDC textureDC;
 	m_d3dEnv->lockD3D();
+	if (x != m_curWidth || y != m_curHeight)
+	{
+		if (m_texVal)
+		{
+			m_texVal->Release();
+			m_texVal = NULL;
+		}
+		if (m_resource)
+		{
+			m_resource->Release();
+			m_resource = NULL;
+		}
+
+		GenerateTexture(x, y);
+	}
 
 	HDC targetDC = GetDC(targetHWND);
 	if(FAILED(m_texVal->QueryInterface(__uuidof(IDXGISurface1), (void **)&m_surface)))

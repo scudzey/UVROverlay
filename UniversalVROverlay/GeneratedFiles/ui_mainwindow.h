@@ -76,6 +76,11 @@ public:
     QLineEdit *scaleText;
     QGroupBox *groupBox_6;
     QComboBox *trackingSelect;
+    QGroupBox *groupBox_7;
+    QSlider *transparancySlider;
+    QLineEdit *transparancyText;
+    QGroupBox *groupBox_8;
+    QComboBox *rateSelect;
     QMenuBar *menuBar;
     QMenu *menuFile;
 
@@ -83,21 +88,21 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(726, 498);
+        MainWindow->resize(726, 548);
         QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
         sizePolicy.setHeightForWidth(MainWindow->sizePolicy().hasHeightForWidth());
         MainWindow->setSizePolicy(sizePolicy);
-        MainWindow->setMinimumSize(QSize(726, 498));
-        MainWindow->setMaximumSize(QSize(726, 498));
+        MainWindow->setMinimumSize(QSize(726, 548));
+        MainWindow->setMaximumSize(QSize(726, 548));
         actionExit = new QAction(MainWindow);
         actionExit->setObjectName(QStringLiteral("actionExit"));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         overlayList = new QListWidget(centralWidget);
         overlayList->setObjectName(QStringLiteral("overlayList"));
-        overlayList->setGeometry(QRect(0, 30, 291, 441));
+        overlayList->setGeometry(QRect(0, 30, 291, 491));
         QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
         sizePolicy1.setHorizontalStretch(0);
         sizePolicy1.setVerticalStretch(0);
@@ -111,7 +116,7 @@ public:
         remOverlayButton->setGeometry(QRect(230, 0, 31, 31));
         groupBox = new QGroupBox(centralWidget);
         groupBox->setObjectName(QStringLiteral("groupBox"));
-        groupBox->setGeometry(QRect(300, 24, 421, 448));
+        groupBox->setGeometry(QRect(300, 24, 421, 498));
         sizePolicy.setHeightForWidth(groupBox->sizePolicy().hasHeightForWidth());
         groupBox->setSizePolicy(sizePolicy);
         titleBox = new QLineEdit(groupBox);
@@ -232,7 +237,7 @@ public:
         scaleSlider = new QSlider(groupBox_5);
         scaleSlider->setObjectName(QStringLiteral("scaleSlider"));
         scaleSlider->setGeometry(QRect(10, 20, 171, 22));
-        scaleSlider->setMaximum(102);
+        scaleSlider->setMaximum(101);
         scaleSlider->setOrientation(Qt::Horizontal);
         scaleText = new QLineEdit(groupBox_5);
         scaleText->setObjectName(QStringLiteral("scaleText"));
@@ -243,6 +248,23 @@ public:
         trackingSelect = new QComboBox(groupBox_6);
         trackingSelect->setObjectName(QStringLiteral("trackingSelect"));
         trackingSelect->setGeometry(QRect(10, 20, 131, 22));
+        groupBox_7 = new QGroupBox(groupBox);
+        groupBox_7->setObjectName(QStringLiteral("groupBox_7"));
+        groupBox_7->setGeometry(QRect(10, 440, 241, 51));
+        transparancySlider = new QSlider(groupBox_7);
+        transparancySlider->setObjectName(QStringLiteral("transparancySlider"));
+        transparancySlider->setGeometry(QRect(10, 20, 171, 22));
+        transparancySlider->setMaximum(101);
+        transparancySlider->setOrientation(Qt::Horizontal);
+        transparancyText = new QLineEdit(groupBox_7);
+        transparancyText->setObjectName(QStringLiteral("transparancyText"));
+        transparancyText->setGeometry(QRect(190, 20, 41, 20));
+        groupBox_8 = new QGroupBox(groupBox);
+        groupBox_8->setObjectName(QStringLiteral("groupBox_8"));
+        groupBox_8->setGeometry(QRect(260, 440, 151, 51));
+        rateSelect = new QComboBox(groupBox_8);
+        rateSelect->setObjectName(QStringLiteral("rateSelect"));
+        rateSelect->setGeometry(QRect(10, 20, 131, 22));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -297,6 +319,18 @@ public:
          << QApplication::translate("MainWindow", "HMD", 0)
          << QApplication::translate("MainWindow", "Controller 1", 0)
          << QApplication::translate("MainWindow", "Controller 2", 0)
+        );
+        groupBox_7->setTitle(QApplication::translate("MainWindow", "Tansparancy", 0));
+        groupBox_8->setTitle(QApplication::translate("MainWindow", "Refresh Rate", 0));
+        rateSelect->clear();
+        rateSelect->insertItems(0, QStringList()
+         << QApplication::translate("MainWindow", "1 FPS", 0)
+         << QApplication::translate("MainWindow", "5 FPS", 0)
+         << QApplication::translate("MainWindow", "10 FPS", 0)
+         << QApplication::translate("MainWindow", "24 FPS", 0)
+         << QApplication::translate("MainWindow", "30 FPS", 0)
+         << QApplication::translate("MainWindow", "50 FPS", 0)
+         << QApplication::translate("MainWindow", "60 FPS", 0)
         );
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
     } // retranslateUi

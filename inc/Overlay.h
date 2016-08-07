@@ -34,6 +34,12 @@ public:
 	virtual void setTracking(uint32_t device)=0;
 	virtual uint32_t getTracking() const = 0 ;
 
+	virtual void setRate(int rateSelect) = 0;
+	virtual int getRate() const = 0;
+
+	virtual void setTransparancy(int transparancy) = 0;
+	virtual int getTransparancy() const = 0;
+
 
 	virtual void asyncUpdate() = 0;
 

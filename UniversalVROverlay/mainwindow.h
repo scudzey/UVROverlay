@@ -91,6 +91,14 @@ private slots:
 
     void on_yTranslateDownBig_clicked();
 
+    void on_rateSelect_currentIndexChanged(int index);
+
+    void on_transparancyText_editingFinished();
+
+    void on_transparancySlider_sliderMoved(int position);
+
+	void on_textureUpdate(int index);
+
 private:
 	bool nativeEvent(const QByteArray& eventType, void* message, long *result);
     Ui::MainWindow *ui;

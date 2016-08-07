@@ -852,61 +852,7 @@ release\mainwindow.obj: mainwindow.cpp mainwindow.h \
 		WindowDescriptor.h \
 		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QDialog \
 		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qdialog.h \
-		GeneratedFiles\ui_mainwindow.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\QVariant \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QAction \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qaction.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qactiongroup.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QApplication \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qapplication.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qcoreapplication.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qeventloop.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qdesktopwidget.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qguiapplication.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qinputmethod.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QButtonGroup \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qbuttongroup.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QComboBox \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qcombobox.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractitemdelegate.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qstyleoption.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractspinbox.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qvalidator.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qregularexpression.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qslider.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractslider.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qstyle.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qtabbar.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qrubberband.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qframe.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qabstractitemmodel.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QGroupBox \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qgroupbox.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QHeaderView \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qheaderview.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractitemview.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractscrollarea.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qitemselectionmodel.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QLabel \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qlabel.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QLineEdit \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qlineedit.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qtextcursor.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qtextformat.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qpen.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qtextoption.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QListWidget \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qlistwidget.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qlistview.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QMenu \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qmenu.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QMenuBar \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qmenubar.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QPushButton \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qpushbutton.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractbutton.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QSlider \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QWidget
+		GeneratedFiles\ui_mainwindow.h
 
 release\OverlayManagerFormView.obj: OverlayManagerFormView.cpp OverlayManagerFormView.h \
 		stdafx.h \
@@ -1014,48 +960,7 @@ release\windowselect.obj: windowselect.cpp windowselect.h \
 		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qfiledevice.h \
 		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qvector2d.h \
 		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qtouchdevice.h \
-		GeneratedFiles\ui_windowselect.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\QVariant \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QAction \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qaction.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qicon.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qactiongroup.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QApplication \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qapplication.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qcoreapplication.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qeventloop.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qdesktopwidget.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qguiapplication.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qinputmethod.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QButtonGroup \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qbuttongroup.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QComboBox \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qcombobox.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractitemdelegate.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qstyleoption.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractspinbox.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtGui\qvalidator.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qregularexpression.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qslider.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractslider.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qstyle.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qtabbar.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qtabwidget.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qrubberband.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qframe.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qabstractitemmodel.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QDialogButtonBox \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qdialogbuttonbox.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QGroupBox \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qgroupbox.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QHeaderView \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qheaderview.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractitemview.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractscrollarea.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qitemselectionmodel.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\QPushButton \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qpushbutton.h \
-		D:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtWidgets\qabstractbutton.h
+		GeneratedFiles\ui_windowselect.h
 
 release\moc_mainwindow.obj: GeneratedFiles\release\moc_mainwindow.cpp 
 

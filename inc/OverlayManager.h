@@ -7,6 +7,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <QObject>
 
 #define DBOUT( s )            \
 {                             \
@@ -47,8 +48,10 @@ bool InvertMatrix(const boost::numeric::ublas::matrix<T>& input, boost::numeric:
 	return true;
 }
 
-class OverlayManager
+class OverlayManager : public QObject
 {
+	Q_OBJECT
+
 public:
 	OverlayManager();
 	OverlayManager(const std::vector<std::shared_ptr<Overlay>>& overlayList);
@@ -65,7 +68,8 @@ public:
 	void asyncUpdate();
 	void setupThread();
 
-	
+signals:
+	void textureUpdated(int index);
 
 private:
 	//Update overlay tracking
@@ -81,6 +85,12 @@ private:
 
 	Overlay* m_controller1Tracking = NULL;
 	Overlay* m_controller2Tracking = NULL;
+
+	bool m_controller1TouchPressed;
+	bool m_controller2TouchPressed;
+
+	bool m_controller1GripPressed;
+	bool m_controller2GripPressed;
 };
 
 

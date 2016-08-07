@@ -52,6 +52,12 @@ public:
 	vr::VROverlayHandle_t getOverlayHandle() const;
 	vr::HmdMatrix34_t getOverlayMatrix() const;
 
+	void setRate(int rateSelect);
+	int getRate() const;
+
+	void setTransparancy(int transparancy);
+	int getTransparancy() const;
+
 	
 
 	std::wstring getName() const;
@@ -103,6 +109,10 @@ private:
 	unsigned int m_texHeight;
 
 	bool m_isVisible;
+
+	int m_rate;
+	
+	float m_transparancy;
 
 
 };

@@ -6,6 +6,10 @@ OverlayManager::OverlayManager()
 	:m_overlayVec()
 	, m_updateThread(NULL)
 	, m_timer(m_io, boost::posix_time::millisec(20))
+	, m_controller1TouchPressed(false)
+	, m_controller2TouchPressed(false)
+	, m_controller1GripPressed(false)
+	, m_controller2GripPressed(false)
 {
 	m_timer.async_wait(boost::bind(&OverlayManager::asyncUpdate, this));
 	m_updateThread = new boost::thread(&OverlayManager::setupThread, this);
@@ -15,6 +19,10 @@ OverlayManager::OverlayManager(const std::vector<std::shared_ptr<Overlay>>& over
 	:m_overlayVec(overlayList)
 	, m_updateThread(NULL)
 	, m_timer(m_io, boost::posix_time::millisec(20))
+	, m_controller1TouchPressed(false)
+	, m_controller2TouchPressed(false)
+	, m_controller1GripPressed(false)
+	, m_controller2GripPressed(false)
 {
 	m_timer.async_wait(boost::bind(&OverlayManager::asyncUpdate, this));
 	m_updateThread = new boost::thread(&OverlayManager::setupThread, this);
@@ -115,7 +123,7 @@ void OverlayManager::asyncUpdate()
 	}
 
 
-
+	int count = 0;
 	for (std::vector<std::shared_ptr<Overlay>>::iterator it = m_overlayVec.begin(); it != m_overlayVec.end(); ++it)
 	{
 		if (vrSys && controller1 >= 0 && (*it)->isVisible())
@@ -126,8 +134,8 @@ void OverlayManager::asyncUpdate()
 			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), vr::k_unTrackedDeviceIndex_Hmd, &hmdState, &hmdPose);
 
 			//Center of the overlay adjusted for scale
-			overlayCenter.v[0] = 0.5f * ((float)(*it)->getScale() / 100.0f);
-			overlayCenter.v[1] = 0.5f * ((float)(*it)->getScale() / 100.0f);
+			overlayCenter.v[0] = 0.5f;// * ((float)(*it)->getScale() / 100.0f);
+			overlayCenter.v[1] = 0.5f;// * ((float)(*it)->getScale() / 100.0f);
 
 			//Get the overlay transform relative to tracking space
 			vr::EVROverlayError err = vr::VROverlayError_None;
@@ -156,15 +164,62 @@ void OverlayManager::asyncUpdate()
 					//If controller1 is not currently tracking and controller2 isn't tracking overlay
 					if(controller1State.rAxis[1].x > 0.75f && (m_controller1Tracking == NULL || m_controller1Tracking == (*it).get()) && m_controller2Tracking != (*it).get())
 					{
+						
 						TrackingUpdate(it, controller1State, controller1Pose, controller1InOverlay, vrSys, vrComp);
 						m_controller1Tracking = (*it).get();
+						emit textureUpdated(count);
+						
 					}
 
 					//If trigger is released and was tracking, reset pointer to null;
 					if (controller1State.rAxis[1].x < 0.75f && m_controller1Tracking != NULL)
 					{
+						
 						m_controller1Tracking = NULL;
 					}
+
+
+					//If touchpad is pressed in overlay w/ debounce check
+					if (((controller1State.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) == vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) &&
+						!m_controller1TouchPressed)
+					{
+						m_controller1TouchPressed = true;
+						//bottom left - decrease opacity
+						if (controller1State.rAxis[0].x < 0 && controller1State.rAxis[0].y < 0)
+							(*it)->setTransparancy((*it)->getTransparancy() - 5);
+						//bottom right - increase opacity
+						if (controller1State.rAxis[0].x > 0 && controller1State.rAxis[0].y < 0)
+							(*it)->setTransparancy((*it)->getTransparancy() + 5);
+						//top left - decrease scale
+						if (controller1State.rAxis[0].x < 0 && controller1State.rAxis[0].y > 0)
+							(*it)->setScale((*it)->getScale() - 5);
+						//top right - increase scale
+						if (controller1State.rAxis[0].x > 0 && controller1State.rAxis[0].y > 0)
+							(*it)->setScale((*it)->getScale() + 5);
+
+						emit textureUpdated(count);
+					}
+					else if (((controller1State.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) != vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) &&
+						m_controller1TouchPressed)
+					{
+						m_controller1TouchPressed = false;
+					}
+
+					//If SideButton is pressed
+					else if (((controller1State.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Grip)) == vr::ButtonMaskFromId(vr::k_EButton_Grip)) &&
+						!m_controller1GripPressed)
+					{
+						m_controller1GripPressed = true;
+						(*it)->setTracking(((*it)->getTracking() + 1) % 4);
+						emit textureUpdated(count);
+					}
+
+					else if (((controller1State.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Grip)) != vr::ButtonMaskFromId(vr::k_EButton_Grip)) &&
+						m_controller1GripPressed)
+					{
+						m_controller1GripPressed = false;
+					}
+
 					
 				}
 				if (controller2InOverlay && (*it)->getTracking() != 3)
@@ -172,23 +227,67 @@ void OverlayManager::asyncUpdate()
 					//If controller2 is not currently tracking and controller1 isn't tracking overlay			
 					if (controller2State.rAxis[1].x > 0.75f && (m_controller2Tracking == NULL || m_controller2Tracking == (*it).get()) && m_controller1Tracking != (*it).get())
 					{
+						
 						TrackingUpdate(it, controller2State, controller2Pose, controller2InOverlay, vrSys, vrComp);
 						m_controller2Tracking = (*it).get();
+						emit textureUpdated(count);
 					}
 					if (controller2State.rAxis[1].x < 0.75f && m_controller2Tracking != NULL)
 					{
 						m_controller2Tracking = NULL;
 					}
+
+					//If touchpad is pressed in overlay w/ debounce check
+					if (((controller2State.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) == vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) &&
+						!m_controller2TouchPressed)
+					{
+						m_controller2TouchPressed = true;
+						//bottom left - decrease opacity
+						if (controller2State.rAxis[0].x < 0 && controller2State.rAxis[0].y < 0)
+							(*it)->setTransparancy((*it)->getTransparancy() - 5);
+						//bottom right - increase opacity
+						if (controller2State.rAxis[0].x > 0 && controller2State.rAxis[0].y < 0)
+							(*it)->setTransparancy((*it)->getTransparancy() + 5);
+						//top left - decrease scale
+						if (controller2State.rAxis[0].x < 0 && controller2State.rAxis[0].y > 0)
+							(*it)->setScale((*it)->getScale() - 5);
+						//top right - increase scale
+						if (controller2State.rAxis[0].x > 0 && controller2State.rAxis[0].y > 0)
+							(*it)->setScale((*it)->getScale() + 5);
+
+						emit textureUpdated(count);
+					}
+					else if (((controller2State.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) != vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) &&
+						m_controller2TouchPressed)
+					{
+						m_controller2TouchPressed = false;
+					}
+					//If SideButton is pressed
+					else if (((controller2State.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Grip)) == vr::ButtonMaskFromId(vr::k_EButton_Grip)) &&
+						!m_controller2GripPressed)
+					{
+						m_controller2GripPressed = true;
+						(*it)->setTracking(((*it)->getTracking() + 1) % 4);
+					}
+					else if (((controller2State.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Grip)) != vr::ButtonMaskFromId(vr::k_EButton_Grip)) &&
+						m_controller2GripPressed)
+					{
+						m_controller2GripPressed = false;
+					}
+
+
 				}
+
 				
 			} //end controller in overlay if check
 
 		} //end VR check if
+		count++;
 	} //end iterator loop for overlays 
 
 
 
-	m_timer.expires_from_now(boost::posix_time::milliseconds(20));
+	m_timer.expires_from_now(boost::posix_time::milliseconds(5));
 	m_timer.async_wait(boost::bind(&OverlayManager::asyncUpdate, this));
 }
 
@@ -211,9 +310,7 @@ void OverlayManager::TrackingUpdate(std::vector<std::shared_ptr<Overlay>>::itera
 	vr::TrackedDevicePose_t controller1Pose;
 	vr::TrackedDevicePose_t controller2Pose;
 
-	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller1, &controller1State, &controller1Pose);
-	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller2, &controller2State, &controller2Pose);
-	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), vr::k_unTrackedDeviceIndex_Hmd, &hmdState, &hmdPose);
+	
 
 	for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++)
 	{
@@ -234,6 +331,10 @@ void OverlayManager::TrackingUpdate(std::vector<std::shared_ptr<Overlay>>::itera
 			}
 		}
 	}
+
+	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller1, &controller1State, &controller1Pose);
+	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller2, &controller2State, &controller2Pose);
+	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), vr::k_unTrackedDeviceIndex_Hmd, &hmdState, &hmdPose);
 
 
 	if (controllerInOverlay) //controller trigger squeezed, in overlay and not being tracked to controller1
