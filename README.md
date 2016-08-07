@@ -26,6 +26,7 @@ You can download the current release [here](https://github.com/scudzey/UVROverla
 * Hotkey toggling
 * State saving
 * VR menu system
+* Gamepad Support
 
 ## Known Issues
 * This won't work for all windows, only those with DWM drawing
