@@ -1,13 +1,13 @@
 # UVROverlay
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6D4FGY2RBLSFS)  
 
-This is a ground up implementation VR overlay manager built on openVR.  Currently in development for release and developed by myself.
+This is a ground up implementation VR window overlay manager built on openVR.  Currently in development for release and developed by myself.
 
 ## Current release
 You can download the current release [here](https://github.com/scudzey/UVROverlay/releases)
 
 ## Features
-* Add as many overlays as want!
+* Add as many window overlays as want!
 * Tracking to controllers, HMD and VR space
 * Controller Controls
    * Touch Pad is segmented into four quadrants
