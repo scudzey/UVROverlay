@@ -31,6 +31,6 @@ You can download the current release [here](https://github.com/scudzey/UVROverla
 ## Known Issues
 * This won't work for all windows, only those with DWM drawing
   * Solution for Chrome: disable hardware acceleration
-* Using the controler to move the overlays results in shakey angular movements.  This will be addressed in future release.
+* * Using the controller to move the overlays results in shaky angular movements.  This will be addressed in future release.
 * Minimized applications will not draw
 * Changing an overlay to spacial tracking does not perfectly replicate positioning
