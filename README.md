@@ -18,7 +18,7 @@ You can download the current release [here](https://github.com/scudzey/UVROverla
    * To use, place the controller into the middle of the overlay and press the corresponding button
 * Adjustable update rates
    *  Having multiple overlays running at 60fps can add overhead to any VR game/application also running, lowering this value will diminish the impact
-* Groud up optimized implementation
+* Ground up optimized implementation
   * Low CPU utilization to keep your games running at 90fps
 
 
