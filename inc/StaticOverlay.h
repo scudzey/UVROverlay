@@ -1,8 +1,8 @@
 /*
-**  VROverlay -- OpenVR window overlay management tool
+**		VROverlay -- OpenVR window overlay management tool
 **		Copyright(C) 2016 Joshua New
 **
-**	This program is free software : you can redistribute it and / or modify
+**		This program is free software : you can redistribute it and / or modify
 **		it under the terms of the GNU General Public License as published by
 **		the Free Software Foundation, either version 3 of the License, or
 **		(at your option) any later version.
