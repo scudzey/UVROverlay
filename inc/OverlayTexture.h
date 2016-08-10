@@ -4,7 +4,6 @@
 #include <D3D11_1.h>
 #include <D3DX11.h>
 #include <DXGI.h>
-#include "resources.h"
 #include "RenderEnvironment.h"
 
 #define DBOUT( s )            \

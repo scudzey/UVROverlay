@@ -13,8 +13,6 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "RenderEnvironment.h"
 #include "VertexObject.h"
 #include <openvr.h>
-#include "resources.h"
-#include "../UniversalVROverlay/resource.h"
 #include <Psapi.h>
 #include <PathCch.h>
 #include <shellapi.h>
@@ -83,34 +81,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//Init values
 	selectedIndex = -1;
 	//AllocConsole();
-	// Initialize global strings
-	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadStringW(hInstance, IDC_WIN32PROJECT3, szWindowClass, MAX_LOADSTRING);
-
-
-	//szArgList = CommandLineToArgvW(GetCommandLine(), &argCount);
 	
-
-	
-	//MyRegisterClass(hInstance);
-	/*hFont = CreateFont(
-		14, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE, ANSI_CHARSET,
-		OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-		DEFAULT_PITCH | FF_DONTCARE, L"Arial");*/
-
-	//Init d3d and manager
 	//TODO: add VR hooking to it's own class
-	
-
 
 	// Perform application initialization:
 	/*if (!InitInstance(hInstance, nCmdShow))
 	{
 		return FALSE;
 	}*/
-	
-	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WIN32PROJECT3));
-
 	MSG msg;
 
 	
@@ -133,11 +111,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	MainWindow w(0,mgr, pVRSystem);
 	w.show();
 	hWnd = (HWND)w.effectiveWinId();
-
-	
-	
-
-	
 		
 	//Setup viewport
 	/*D3D11_VIEWPORT viewport;

@@ -120,9 +120,6 @@
     <CustomBuild Include="..\inc\OverlayManager.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\inc\resources.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\inc\StaticOverlay.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -130,9 +127,6 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\inc\WindowOverlay.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="resource.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="WindowDescriptor.h">

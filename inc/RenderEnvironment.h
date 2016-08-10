@@ -10,7 +10,6 @@
 #include <D3DX11.h>
 #include <DXGI.h>
 #include <D3dx9math.h>
-#include "resources.h"
 #include <openvr.h>
 
 struct VertexType
