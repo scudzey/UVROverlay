@@ -246,3 +246,5 @@ ModelManifest.xml
 
 #qmake file
 UniversalVROverlay/Makefile
+UniversalVROverlay/Makefile.Release
+UniversalVROverlay/Makefile.Debug
