@@ -1,3 +1,20 @@
+/*
+**  VROverlay -- OpenVR window overlay management tool
+**		Copyright(C) 2016 Joshua New
+**
+**	This program is free software : you can redistribute it and / or modify
+**		it under the terms of the GNU General Public License as published by
+**		the Free Software Foundation, either version 3 of the License, or
+**		(at your option) any later version.
+**
+**		This program is distributed in the hope that it will be useful,
+**		but WITHOUT ANY WARRANTY; without even the implied warranty of
+**		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+**		GNU General Public License for more details.
+**
+**		You should have received a copy of the GNU General Public License
+**		along with this program.If not, see <http://www.gnu.org/licenses/>.
+*/
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -64,14 +81,10 @@ vr::IVRSystem *pVRSystem;
 std::vector<WindowDescriptor> wndVec;
 
 												// Forward declarations of functions included in this code module:
-ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 BOOL    CALLBACK    EnumProc(HWND hWnd, LPARAM lParam);
-INT_PTR	CALLBACK	DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
-void				updateListBox();
-void				setOptionsIndex();
+
 
 
 
