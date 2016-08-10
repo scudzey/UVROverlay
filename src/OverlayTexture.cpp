@@ -54,6 +54,7 @@ OverlayTexture::~OverlayTexture()
 		m_buffer->Release();
 		m_buffer = NULL;
 	}
+	m_d3dEnv->getContext()->Flush();
 	m_d3dEnv->unlockD3d();
 }
 
@@ -90,7 +91,7 @@ void OverlayTexture::GenerateTexture(unsigned int width, unsigned int height)
 	resourceDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	resourceDesc.Texture2D.MipLevels = 1;
 #ifdef _DEBUG
-	//m_texVal->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof("displayTexture") - 1, "displayTexture");
+	m_texVal->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof("displayTexture") - 1, "displayTexture");
 #endif
 	
 	if (FAILED(err = m_d3dEnv->getDevice()->CreateShaderResourceView(m_texVal, NULL, &m_resource)))
@@ -129,6 +130,9 @@ bool OverlayTexture::setTextureFromWindow(HWND targetHWND, int x, int y)
 	if (FAILED(m_surface->GetDC(TRUE, &textureDC)))
 		return false;
 
+	
+		
+	
 	BitBlt(textureDC, 0, 0, x, y, targetDC, 0, 0, SRCCOPY);
 	m_surface->ReleaseDC(NULL);
 	m_surface->Release();

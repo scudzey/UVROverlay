@@ -26,7 +26,7 @@ RenderEnvironment::RenderEnvironment(int32_t adapterIndex, HWND hWnd)
 	swapDesc.Flags = DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE;
 
 #ifdef _DEBUG
-	UINT createFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;// | D3D11_CREATE_DEVICE_DEBUG;
+	UINT createFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG;
 #else
 	UINT createFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #endif

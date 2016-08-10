@@ -6,6 +6,9 @@
 #include <boost/utility/in_place_factory.hpp>
 #include <boost/utility.hpp>
 
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+
 #include <D3D11_1.h>
 #include <D3DX11.h>
 #include <DXGI.h>
@@ -18,6 +21,36 @@ enum e_axis
 	X_AXIS = 0,
 	Y_AXIS,
 	Z_AXIS
+};
+
+enum e_device
+{
+	SPACIAL = 0,
+	HMD,
+	CONTROLLER1,
+	CONTROLLER2
+};
+
+enum e_updateRate
+{
+	FPS_1 = 0,
+	FPS_5,
+	FPS_10,
+	FPS_24,
+	FPS_30,
+	FPS_50,
+	FPS_60
+};
+
+enum e_updateDelay
+{
+	DELAY_FPS_1 = 1000,
+	DELAY_FPS_5 = (1000 / 5),
+	DELAY_FPS_10 = (1000 / 10),
+	DELAY_FPS_24 = (1000 / 24),
+	DELAY_FPS_30 = (1000 / 30),
+	DELAY_FPS_50 = (1000 / 50),
+	DELAY_FPS_60 = (1000 / 60)
 };
 
 class WindowOverlay : public virtual Overlay

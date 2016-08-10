@@ -95,7 +95,7 @@ void OverlayManager::asyncUpdate()
 
 	unsigned int width, height;
 
-	float padding = 0.1f;
+	
 
 	//Find the controllers
 	vr::IVRSystem* vrSys = vr::VRSystem();
@@ -128,11 +128,15 @@ void OverlayManager::asyncUpdate()
 	{
 		if (vrSys && controller1 >= 0 && (*it)->isVisible())
 		{
+			//Set padding of the overlay based on scale
+			float padding = 0.5f * ((float)(*it)->getScale() / 100.0f);
+			float z_padding = 0.1f;
+
 			//Get the controller pose information relative to tracking space
 			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller1, &controller1State, &controller1Pose);
 			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller2, &controller2State, &controller2Pose);
 			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), vr::k_unTrackedDeviceIndex_Hmd, &hmdState, &hmdPose);
-
+			
 			//Center of the overlay adjusted for scale
 			overlayCenter.v[0] = 0.5f;// * ((float)(*it)->getScale() / 100.0f);
 			overlayCenter.v[1] = 0.5f;// * ((float)(*it)->getScale() / 100.0f);
@@ -144,14 +148,33 @@ void OverlayManager::asyncUpdate()
 				DBOUT("Error with overlay!!" << err << std::endl);
 			}
 
-			//Boolean values for which controller is inside an overlay
-			bool controller1InOverlay = ((controller1Pose.mDeviceToAbsoluteTracking.m[0][3] > (overlayTransform.m[0][3] - padding) && controller1Pose.mDeviceToAbsoluteTracking.m[0][3] < (overlayTransform.m[0][3] + padding)) &&
-				(controller1Pose.mDeviceToAbsoluteTracking.m[1][3] > (overlayTransform.m[1][3] - padding) && controller1Pose.mDeviceToAbsoluteTracking.m[1][3] < (overlayTransform.m[1][3] + padding)) &&
-				(controller1Pose.mDeviceToAbsoluteTracking.m[2][3] > (overlayTransform.m[2][3] - padding) && controller1Pose.mDeviceToAbsoluteTracking.m[2][3] < (overlayTransform.m[2][3] + padding)));
+			//Converts Controller world tracking transform matrix to a transform matrix relative to the overlay
+			Eigen::Transform<float, 3, Eigen::Affine> controller1Transform;
+			Eigen::Transform<float, 3, Eigen::Affine> controller2Transform;
+			Eigen::Transform<float, 3, Eigen::Affine> overlayTrans;
 
-			bool controller2InOverlay = ((controller2Pose.mDeviceToAbsoluteTracking.m[0][3] > (overlayTransform.m[0][3] - padding) && controller2Pose.mDeviceToAbsoluteTracking.m[0][3] < (overlayTransform.m[0][3] + padding)) &&
-				(controller2Pose.mDeviceToAbsoluteTracking.m[1][3] > (overlayTransform.m[1][3] - padding) && controller2Pose.mDeviceToAbsoluteTracking.m[1][3] < (overlayTransform.m[1][3] + padding)) &&
-				(controller2Pose.mDeviceToAbsoluteTracking.m[2][3] > (overlayTransform.m[2][3] - padding) && controller2Pose.mDeviceToAbsoluteTracking.m[2][3] < (overlayTransform.m[2][3] + padding)));
+			for (int i = 0; i < 3; ++i)
+			{
+				for (int j = 0; j < 4; ++j)
+				{
+					controller1Transform(i, j) = controller1Pose.mDeviceToAbsoluteTracking.m[i][j];
+					controller2Transform(i, j) = controller2Pose.mDeviceToAbsoluteTracking.m[i][j];
+					overlayTrans(i, j) = overlayTransform.m[i][j];
+				}
+			}
+			Eigen::Matrix<float, 4, 4> overlayInverse = overlayTrans.matrix().inverse();
+			Eigen::Matrix<float, 4, 4> controller1OverlayTransform = overlayInverse * controller1Transform.matrix();
+			Eigen::Matrix<float, 4, 4> controller2OverlayTransform = overlayInverse * controller2Transform.matrix();
+
+			//Boolean values for if the controller is within the bounds of the overlay based on the padding
+			//z-padding is used for the depth across the face of the overlay
+			bool controller1InOverlay = (controller1OverlayTransform(0, 3) < padding && controller1OverlayTransform(0, 3) > -padding) &&
+										(controller1OverlayTransform(1, 3) < padding && controller1OverlayTransform(1, 3) > -padding) &&
+										(controller1OverlayTransform(2, 3) < z_padding && controller1OverlayTransform(2, 3) > -z_padding);
+			
+			bool controller2InOverlay = (controller2OverlayTransform(0, 3) < padding && controller2OverlayTransform(0, 3) > -padding) &&
+										(controller2OverlayTransform(1, 3) < padding && controller2OverlayTransform(1, 3) > -padding) &&
+										(controller2OverlayTransform(2, 3) < z_padding && controller2OverlayTransform(2, 3) > -z_padding);;
 
 			//If the controller is within the bounds the center of the overlay
 			if (controller1InOverlay || controller2InOverlay)
@@ -346,10 +369,10 @@ void OverlayManager::TrackingUpdate(std::vector<std::shared_ptr<Overlay>>::itera
 		else
 		{
 			//Must be same sized for matrix inverse calculation
-			boost::numeric::ublas::matrix<float> trackedSource(4, 4);
-			boost::numeric::ublas::matrix<float> invertedSource(4, 4);
-			boost::numeric::ublas::matrix<float> controllerTransform(4, 4);
-			boost::numeric::ublas::matrix<float> newTransform(4, 4);
+			Eigen::Transform<float, 3, Eigen::Affine> trackedSource;
+			Eigen::Transform<float, 3, Eigen::Affine> invertedSource;
+			Eigen::Transform<float, 3, Eigen::Affine> controllerTransform;
+			//Eigen::Transform<float, 3, Eigen::Affine> newTransform;
 			vr::HmdMatrix34_t newPosition;
 			memset(&newPosition, 0, sizeof(vr::HmdMatrix34_t));
 
@@ -357,12 +380,11 @@ void OverlayManager::TrackingUpdate(std::vector<std::shared_ptr<Overlay>>::itera
 
 
 			//Populate boost matrices
-			for (unsigned i = 0; i < trackedSource.size1(); ++i)
+			for (unsigned i = 0; i < 3; ++i)
 			{
-				for (unsigned j = 0; j < trackedSource.size2(); ++j)
+				for (unsigned j = 0; j < 4; ++j)
 				{
-					if (i < 3)
-					{
+					
 						if ((*it)->getTracking() == 1)
 						{
 							trackedSource(i, j) = hmdPose.mDeviceToAbsoluteTracking.m[i][j];
@@ -376,32 +398,22 @@ void OverlayManager::TrackingUpdate(std::vector<std::shared_ptr<Overlay>>::itera
 							trackedSource(i, j) = controller2Pose.mDeviceToAbsoluteTracking.m[i][j];
 						}
 						controllerTransform(i, j) = controllerPose.mDeviceToAbsoluteTracking.m[i][j];
-					}
-					//Handle out of bound values for new 4x4 matrix
-					else
-					{
-						if (j == 3)
-						{
-							trackedSource(i, j) = 1;
-							controllerTransform(i, j) = 1;
-						}
-						else
-						{
-							trackedSource(i, j) = 0;
-							controllerTransform(i, j) = 0;
-						}
-					}
+				
+					
 				} //End Column loop
 			}  //End Row loop
 
-			   //Invert Matrix and create new transform product from controller
-			InvertMatrix(trackedSource, invertedSource);
-			newTransform = boost::numeric::ublas::prod(invertedSource, controllerTransform);
+			
+			Eigen::Matrix<float, 4, 4> invMatrix = trackedSource.matrix().inverse();
+			Eigen::Matrix<float, 4, 4> newTransform;
+			newTransform = invMatrix * controllerTransform.matrix();
+
+
 
 			//Copy values from the new matrix into the openVR matrix
-			for (unsigned i = 0; i < newTransform.size1(); ++i)
+			for (unsigned i = 0; i < 3; ++i)
 			{
-				for (unsigned j = 0; j < newTransform.size2(); ++j)
+				for (unsigned j = 0; j < 4; ++j)
 				{
 					if (i < 3)
 					{
@@ -409,6 +421,9 @@ void OverlayManager::TrackingUpdate(std::vector<std::shared_ptr<Overlay>>::itera
 					}
 				} // end column loop
 			} //end row loop
+
+			//Maintain previous rotation
+
 
 			(*it)->setOverlayMatrix(newPosition);
 		} // end else (tracking check for non-spacial tracking)

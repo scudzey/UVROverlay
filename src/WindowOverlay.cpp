@@ -3,25 +3,6 @@
 
 
 
-//overlay helper functions
-
-vr::HmdMatrix44_t multMatrix(vr::HmdMatrix44_t m1, vr::HmdMatrix44_t m2)
-{
-	vr::HmdMatrix44_t result;
-	memset(&result, 0, sizeof(result));
-
-	for (int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
-			for (int k = 0; k < 4; k++)
-				result.m[i][j] += m1.m[i][k] * m2.m[k][j];
-
-	return result;
-}
-
-
-//class functions
-
-
 WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture, vr::IVRSystem* vrsys)
 	:m_OverlayTexture(d3dTexture)
 	, m_targetHwnd(NULL)
@@ -70,6 +51,8 @@ WindowOverlay::~WindowOverlay()
 	//Clean up texture;
 	if (m_OverlayTexture)
 	{
+		if (m_OverlayTexture->getTexture())
+			m_OverlayTexture->getTexture()->Release();
 		delete m_OverlayTexture;
 		m_OverlayTexture = NULL;
 	}
@@ -178,11 +161,11 @@ void WindowOverlay::setTracking(uint32_t device)
 	
 	switch (device)
 	{
-	case 0:
+	case SPACIAL:
 		vr::VROverlay()->GetTransformForOverlayCoordinates(m_ulOverlayHandle, vr::VRCompositor()->GetTrackingSpace(), overlayCenter, &newOverlayTransform);
 		setOverlayMatrix(newOverlayTransform);
 		break;
-	case 1:
+	case HMD:
 		m_xTrans = 0;
 		m_yTrans = 0;
 		m_zTrans = -9;
@@ -193,8 +176,8 @@ void WindowOverlay::setTracking(uint32_t device)
 
 		m_scale = 100;
 		break;
-	case 2:
-	case 3:
+	case CONTROLLER1:
+	case CONTROLLER2:
 		m_xTrans = 0;
 		m_yTrans = 2;
 		m_zTrans = 0;
@@ -230,26 +213,26 @@ void WindowOverlay::setRate(int rateSelect)
 	*/
 	switch (rateSelect)
 	{
-	case 0:
-		m_rate = 1000;
+	case FPS_1:
+		m_rate = DELAY_FPS_1;
 		break;
-	case 1:
-		m_rate = 1000 / 5;
+	case FPS_5:
+		m_rate = DELAY_FPS_5;
 		break;
-	case 2:
-		m_rate = 1000 / 10;
+	case FPS_10:
+		m_rate = DELAY_FPS_10;
 		break;
-	case 3:
-		m_rate = 1000 / 24;
+	case FPS_24:
+		m_rate = DELAY_FPS_24;
 		break;
-	case 4:
-		m_rate = 1000 / 30;
+	case FPS_30:
+		m_rate = DELAY_FPS_30;
 		break;
-	case 5:
-		m_rate = 1000 / 50;
+	case FPS_50:
+		m_rate = DELAY_FPS_50;
 		break;
-	case 6:
-		m_rate = 1000 / 60;
+	case FPS_60:
+		m_rate = DELAY_FPS_60;
 		break;
 	}
 
@@ -258,26 +241,26 @@ int WindowOverlay::getRate() const
 {
 	switch (m_rate)
 	{
-	case 1000:
-		return 0;
+	case DELAY_FPS_1:
+		return FPS_1;
 		break;
-	case (1000 / 5):
-		return 1;
+	case DELAY_FPS_5:
+		return FPS_5;
 		break;
-	case (1000 / 10):
-		return 2;
+	case DELAY_FPS_10:
+		return FPS_10;
 		break;
-	case (1000 / 24):
-		return 3;
+	case DELAY_FPS_24:
+		return FPS_24;
 		break;
-	case (1000 / 30):
-		return 4;
+	case DELAY_FPS_30:
+		return FPS_30;
 		break;
-	case (1000 / 50):
-		return 5;
+	case DELAY_FPS_50:
+		return FPS_50;
 		break;
-	case (1000 / 60):
-		return 6;
+	case DELAY_FPS_60:
+		return FPS_60;
 	}
 }
 
@@ -311,7 +294,7 @@ void WindowOverlay::setOverlayTracking()
 	bool first = true;
 
 	//Set overlay to the VR world
-	if (m_TrackedDevice == 0)
+	if (m_TrackedDevice == SPACIAL)
 	{
 		vr::VROverlay()->SetOverlayTransformAbsolute(m_ulOverlayHandle, vr::VRCompositor()->GetTrackingSpace(), &m_overlayDistanceMtx);
 		return;
@@ -342,18 +325,18 @@ void WindowOverlay::setOverlayTracking()
 	}
 	
 	
-	if (m_TrackedDevice == 2 && controller1 >= 0)
+	if (m_TrackedDevice == CONTROLLER1 && controller1 >= 0)
 	{
 		vr::VROverlay()->SetOverlayTransformTrackedDeviceRelative(m_ulOverlayHandle, controller1, &m_overlayDistanceMtx);
 		return;
 	}
-	if (m_TrackedDevice == 3 && controller2 >= 0)
+	if (m_TrackedDevice == CONTROLLER2 && controller2 >= 0)
 	{
 		vr::VROverlay()->SetOverlayTransformTrackedDeviceRelative(m_ulOverlayHandle, controller2, &m_overlayDistanceMtx);
 		return;
 	}
 
-	m_TrackedDevice = 1;
+	m_TrackedDevice = HMD;
 	vr::VROverlay()->SetOverlayTransformTrackedDeviceRelative(m_ulOverlayHandle, vr::k_unTrackedDeviceIndex_Hmd, &m_overlayDistanceMtx);
 	
 	
@@ -387,7 +370,8 @@ void WindowOverlay::updateTexture()
 	int y = rect.bottom - rect.top;
 
 	ID3D11Texture2D* oldTex = m_OverlayTexture->getTexture();
-	m_OverlayTexture->setTextureFromWindow(m_targetHwnd, x, y);
+	if (!m_OverlayTexture->setTextureFromWindow(m_targetHwnd, x, y))
+		return;
 	
 
 	ID3D11ShaderResourceView* shaderResource;
@@ -403,6 +387,9 @@ void WindowOverlay::updateTexture()
 		vr::Texture_t m_texture = { (void *)m_OverlayTexture->getTexture(), vr::API_DirectX ,  vr::ColorSpace_Gamma };
 		vr::VROverlay()->SetOverlayTexture(m_ulOverlayHandle, &m_texture);
 	}
+	
+	
+
 
 	//Get reference to OpenVR ID3D11Texture2D
 	vr::VROverlay()->GetOverlayTexture(m_ulOverlayHandle, (void **)&shaderResource, m_OverlayTexture->getTexture(), &pwidth, &pHeight, &pNativeFormat, &pAPI, &pColorSpace);
@@ -462,16 +449,26 @@ vr::HmdMatrix34_t WindowOverlay::getOverlayMatrix() const
 void WindowOverlay::setOverlayMatrix(const vr::HmdMatrix34_t & relativePosition)
 {
 	
-	//m_overlayDistanceMtx = relativePosition;
-
+	//Get Translations
 	m_xTrans = relativePosition.m[0][3] * 25.0f;// *(m_scale / 100.0f);
 	m_yTrans = relativePosition.m[1][3] * 25.0f;// *(m_scale / 100.0f);
 	m_zTrans = relativePosition.m[2][3] *25.0f;// *25.0f*(m_scale / 100.0f);
 
-	m_xRotate = std::atan2(relativePosition.m[2][1], relativePosition.m[2][2]) * (180.0f / 3.14159f);
-	m_yRotate = std::atan2(-relativePosition.m[2][0], std::sqrt((relativePosition.m[2][1] * relativePosition.m[2][1]) +
-																	(relativePosition.m[2][2] * relativePosition.m[2][2]))) * (180.0f / 3.14159f);
-	m_zRotate = std::atan2(relativePosition.m[1][0], relativePosition.m[0][0]) * (180.0f / 3.14159f);
+	//Copy VR Matrix into Eigen matrix and calcuate euler angles of transform
+	Eigen::Matrix3f transformAngles;
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			transformAngles(i, j) = relativePosition.m[i][j];
+		}
+	}
+	Eigen::Vector3f angles = transformAngles.eulerAngles(0, 1, 2);
+	
+	//Store angles
+	m_xRotate = angles[0] * (180.0f / M_PI);	
+	m_yRotate = angles[1] * (180.0f / M_PI);	
+	m_zRotate = angles[2] * (180.0f / M_PI);	
 
 	updateTransform();
 }
@@ -551,69 +548,25 @@ int WindowOverlay::getTrans(const int axis) const
 
 void WindowOverlay::updateTransform()
 {
-	vr::HmdMatrix44_t Translation, xRotate, yRotate, zRotate, scale;
-	vr::HmdMatrix44_t matrixResult;
-	vr::HmdMatrix44_t result;
-	memset(&scale, 0, sizeof(scale));
-	memset(&Translation, 0, sizeof(Translation));
-	memset(&xRotate, 0, sizeof(xRotate));
-	memset(&yRotate, 0, sizeof(yRotate));
-	memset(&zRotate, 0, sizeof(zRotate));
+	//Setup translation
+	Eigen::Translation3f translation((m_xTrans) / 25.0f, (m_yTrans) / 25.0f, (m_zTrans) / 25.0f);
 
+	//Setup Rotation
+	Eigen::AngleAxisf rotationX((float)m_xRotate*(M_PI / 180.0f), Eigen::Vector3f::UnitX());
+	Eigen::AngleAxisf rotationY((float)m_yRotate*(M_PI / 180.0f), Eigen::Vector3f::UnitY());
+	Eigen::AngleAxisf rotationZ((float)m_zRotate*(M_PI / 180.0f), Eigen::Vector3f::UnitZ());
 
-	//Setup Scale (Currently fixed)
-	scale.m[0][0] = (float)m_scale / 100.0f; //X Scale
-	scale.m[1][1] = (float)m_scale / 100.0f; //Y Scale
-	scale.m[2][2] = (float)m_scale / 100.0f; //Z Scale
-	scale.m[3][3] = 1.0f; //unused
+	//Setup Scale
+	Eigen::Transform<float, 3, Eigen::Affine> transform = translation * (rotationX * rotationY * rotationZ) * Eigen::Scaling((float)m_scale / 100.0f);
 
+	//Get Final Transform
+	Eigen::Matrix<float, 4, 4> finalTransform = transform.matrix();
 
-	//Setup Translation
-	Translation.m[0][0] = 1.0f;
-	Translation.m[1][1] = 1.0f;
-	Translation.m[2][2] = 1.0f;
-	Translation.m[2][2] = 1.0f;
-	Translation.m[0][3] = ((float)(m_xTrans) / 25.0f);// / scale.m[0][0];
-	Translation.m[1][3] = ((float)(m_yTrans) / 25.0f);// / scale.m[0][0];
-	Translation.m[2][3] = ((float)(m_zTrans) / 25.0f);// / scale.m[0][0];
-	Translation.m[3][3] = 1.0f;
-
-	//Setup xRotate matrix
-	xRotate.m[0][0] = 1.0f;
-	xRotate.m[1][1] = std::cos(((float)m_xRotate)*(3.14159f / 180.0f));
-	xRotate.m[1][2] = std::sin(((float)m_xRotate)*(3.14159f / 180.0f)) * -1.0f;
-	xRotate.m[2][1] = std::sin(((float)m_xRotate)*(3.14159f / 180.0f));
-	xRotate.m[2][2] = std::cos(((float)m_xRotate)*(3.14159f / 180.0f));
-	xRotate.m[3][3] = 1.0f;
-
-	//Setup yRotate matrix
-	yRotate.m[0][0] = std::cos(((float)m_yRotate)*(3.14159f / 180.0f));
-	yRotate.m[0][2] = std::sin(((float)m_yRotate)*(3.14159f / 180.0f));
-	yRotate.m[1][1] = 1.0f;
-	yRotate.m[2][0] = std::sin(((float)m_yRotate)*(3.14159f / 180.0f)) * -1.0f;
-	yRotate.m[2][2] = std::cos(((float)m_yRotate)*(3.14159f / 180.0f));
-	yRotate.m[3][3] = 1.0f;
-
-	//Setup zRotate matrix
-	zRotate.m[0][0] = std::cos(((float)m_zRotate)*(3.14159f / 180.0f));
-	zRotate.m[0][1] = std::sin(((float)m_zRotate)*(3.14159f / 180.0f)) * -1.0f;
-	zRotate.m[1][0] = std::sin(((float)m_zRotate)*(3.14159f / 180.0f));
-	zRotate.m[1][1] = std::cos(((float)m_zRotate)*(3.14159f / 180.0f));
-	zRotate.m[2][2] = 1.0f;
-	zRotate.m[3][3] = 1.0f;
-
-	//Matrix product all of them
-	//matrixResult = multMatrix(xRotate, yRotate);
-	//matrixResult = multMatrix(matrixResult, zRotate);
-	result = multMatrix(Translation, zRotate);
-	result = multMatrix(result, xRotate);
-	result = multMatrix(result, yRotate);
-	result = multMatrix(result, scale);
-
+	//Copy Eigen Matrix to VR Matrix
 	for (int i= 0; i < 3; i++)
 		for (int j = 0; j < 4; j++)
 		{
-			m_overlayDistanceMtx.m[i][j] = result.m[i][j];
+			m_overlayDistanceMtx.m[i][j] = finalTransform(i, j);
 		}
 }
 

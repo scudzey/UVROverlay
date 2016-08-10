@@ -7,6 +7,11 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/io.hpp>
+
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+#include <Eigen/LU>
+
 #include <QObject>
 
 #define DBOUT( s )            \
