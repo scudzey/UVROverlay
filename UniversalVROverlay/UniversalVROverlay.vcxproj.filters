@@ -64,9 +64,6 @@
     <ClCompile Include="..\src\VertexObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OverlayManagerFormView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WindowDescriptor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -135,13 +132,7 @@
     <CustomBuild Include="..\inc\WindowOverlay.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="OverlayManagerFormView.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="resource.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="stdafx.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="WindowDescriptor.h">
