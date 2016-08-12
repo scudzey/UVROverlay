@@ -21,6 +21,8 @@ You can download the current release [here](https://github.com/scudzey/UVROverla
 * Ground up optimized implementation
   * Low CPU utilization to keep your games running at 90fps
 
+## Tutorial
+[Tutorial Video](https://www.youtube.com/watch?v=O0wsOl5EWlg)
 
 ## Coming Soon
 * Hotkey toggling
