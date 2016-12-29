@@ -68,8 +68,6 @@ WindowOverlay::~WindowOverlay()
 	//Clean up texture;
 	if (m_OverlayTexture)
 	{
-		if (m_OverlayTexture->getTexture())
-			m_OverlayTexture->getTexture()->Release();
 		delete m_OverlayTexture;
 		m_OverlayTexture = NULL;
 	}
@@ -126,7 +124,7 @@ bool WindowOverlay::ShowOverlay()
 			return false;
 
 		//Set Overlay texture from file
-		vr::Texture_t m_texture = { (void *)m_OverlayTexture->getTexture(), vr::API_DirectX ,  vr::ColorSpace_Gamma };
+		vr::Texture_t m_texture = { (void *)m_OverlayTexture->getTexture(), vr::TextureType_DirectX ,  vr::ColorSpace_Gamma };
 		vr::VROverlay()->SetOverlayTexture(m_ulOverlayHandle, &m_texture);
 		vr::VROverlay()->SetOverlayAlpha(m_ulOverlayHandle, m_transparancy);
 
@@ -277,6 +275,7 @@ int WindowOverlay::getRate() const
 		return FPS_50;
 		break;
 	case DELAY_FPS_60:
+	default:
 		return FPS_60;
 	}
 }
@@ -395,13 +394,14 @@ void WindowOverlay::updateTexture()
 	uint32_t pwidth;
 	uint32_t pHeight;
 	uint32_t pNativeFormat;
-	vr::EGraphicsAPIConvention pAPI;
+	vr::ETextureType pAPI;
 	vr::EColorSpace pColorSpace;
+	vr::VRTextureBounds_t textureBounds;
 
 	if (oldTex != m_OverlayTexture->getTexture())
 	{
 		vr::VROverlay()->ClearOverlayTexture(m_ulOverlayHandle);
-		vr::Texture_t m_texture = { (void *)m_OverlayTexture->getTexture(), vr::API_DirectX ,  vr::ColorSpace_Gamma };
+		vr::Texture_t m_texture = { (void *)m_OverlayTexture->getTexture(), vr::TextureType_DirectX ,  vr::ColorSpace_Gamma };
 		vr::VROverlay()->SetOverlayTexture(m_ulOverlayHandle, &m_texture);
 	}
 	
@@ -409,7 +409,7 @@ void WindowOverlay::updateTexture()
 
 
 	//Get reference to OpenVR ID3D11Texture2D
-	vr::VROverlay()->GetOverlayTexture(m_ulOverlayHandle, (void **)&shaderResource, m_OverlayTexture->getTexture(), &pwidth, &pHeight, &pNativeFormat, &pAPI, &pColorSpace);
+	vr::VROverlay()->GetOverlayTexture(m_ulOverlayHandle, (void **)&shaderResource, m_OverlayTexture->getTexture(), &pwidth, &pHeight, &pNativeFormat, &pAPI, &pColorSpace, &textureBounds);
 	
 	//Copy Texture data from OverlayTexture to the openVR Texture reference
 	m_OverlayTexture->updateTexture(shaderResource);

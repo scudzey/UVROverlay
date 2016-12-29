@@ -71,7 +71,6 @@ private:
 
 	ID3D11RenderTargetView  *m_renderTgt;
 
-	bool m_bDisableCompatibilityMode;
 };
 
 

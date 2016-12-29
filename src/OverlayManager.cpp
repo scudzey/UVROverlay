@@ -88,6 +88,8 @@ void OverlayManager::sendEvent(const vr::VREvent_t& event)
 	}
 }
 
+
+//TODO: This is ugly and hacky and needs to get refactored
 void OverlayManager::asyncUpdate()
 {
 	boost::lock_guard<boost::mutex> guard(mtx_);
@@ -150,9 +152,9 @@ void OverlayManager::asyncUpdate()
 			float z_padding = 0.1f;
 
 			//Get the controller pose information relative to tracking space
-			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller1, &controller1State, &controller1Pose);
-			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller2, &controller2State, &controller2Pose);
-			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), vr::k_unTrackedDeviceIndex_Hmd, &hmdState, &hmdPose);
+			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller1, &controller1State, sizeof(controller1State), &controller1Pose);
+			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller2, &controller2State, sizeof(controller2State), &controller2Pose);
+			vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), vr::k_unTrackedDeviceIndex_Hmd, &hmdState, sizeof(hmdState), &hmdPose);
 			
 			//Center of the overlay adjusted for scale
 			overlayCenter.v[0] = 0.5f;// * ((float)(*it)->getScale() / 100.0f);
@@ -372,9 +374,9 @@ void OverlayManager::TrackingUpdate(std::vector<std::shared_ptr<Overlay>>::itera
 		}
 	}
 
-	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller1, &controller1State, &controller1Pose);
-	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller2, &controller2State, &controller2Pose);
-	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), vr::k_unTrackedDeviceIndex_Hmd, &hmdState, &hmdPose);
+	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller1, &controller1State, sizeof(controller1State), &controller1Pose);
+	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), controller2, &controller2State, sizeof(controller2State), &controller2Pose);
+	vrSys->GetControllerStateWithPose(vrComp->GetTrackingSpace(), vr::k_unTrackedDeviceIndex_Hmd,  &hmdState, sizeof(hmdState), &hmdPose);
 
 
 	if (controllerInOverlay) //controller trigger squeezed, in overlay and not being tracked to controller1
