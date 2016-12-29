@@ -45,6 +45,9 @@ public:
 
 	virtual vr::VROverlayHandle_t getOverlayHandle() const = 0;
 
+	virtual void toggleMoveLock() = 0;
+	virtual bool getMoveLock() = 0;
+
 	virtual void setScale(const int scale) = 0;
 	virtual int getScale() const =0;
 

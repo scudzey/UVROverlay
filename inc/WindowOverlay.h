@@ -84,6 +84,9 @@ public:
 	virtual boost::uuids::uuid getOverlayUuid() const;
 	virtual void setHwnd(HWND);
 
+	void toggleMoveLock();
+	bool getMoveLock();
+
 	void setRotate(const int axis, const int value);
 	void setTrans(const int axis, const int value);
 
@@ -159,6 +162,7 @@ private:
 	unsigned int m_texHeight;
 
 	bool m_isVisible;
+	bool m_moveLockFlag;
 
 	int m_rate;
 	

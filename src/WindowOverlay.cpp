@@ -28,11 +28,12 @@ WindowOverlay::WindowOverlay(OverlayTexture* d3dTexture, vr::IVRSystem* vrsys)
 	, m_io(boost::in_place())
 	, m_rate(1000 / 60)
 	, m_transparancy(1.0f)
-	, m_timer( boost::in_place(boost::ref(m_io.get()), boost::posix_time::millisec(m_rate)))
+	, m_timer(boost::in_place(boost::ref(m_io.get()), boost::posix_time::millisec(m_rate)))
 	, m_TrackedDevice(1) //Set to track to head by default
 	, m_vrSys(vrsys)
 	, m_scale(100)
 	, m_isVisible(false)
+	, m_moveLockFlag(false)
 	, m_xTrans(0)
 	, m_yTrans(0)
 	, m_zTrans(-9)
@@ -500,8 +501,20 @@ void WindowOverlay::setHwnd(HWND hWnd)
 	m_targetHwnd = hWnd;
 }
 
+void WindowOverlay::toggleMoveLock()
+{
+	m_moveLockFlag = !m_moveLockFlag;
+}
+bool WindowOverlay::getMoveLock()
+{
+	return m_moveLockFlag;
+}
+
 void WindowOverlay::setRotate(const int axis, const int value)
 {
+	if (m_moveLockFlag)
+		return;
+
 	switch (axis)
 	{
 	case X_AXIS:
@@ -519,6 +532,9 @@ void WindowOverlay::setRotate(const int axis, const int value)
 
 void WindowOverlay::setTrans(const int axis, const int value)
 {
+	if (m_moveLockFlag)
+		return;
+
 	switch (axis)
 	{
 	case X_AXIS:
