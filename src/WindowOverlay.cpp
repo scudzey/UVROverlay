@@ -585,6 +585,7 @@ void WindowOverlay::updateTransform()
 		{
 			m_overlayDistanceMtx.m[i][j] = finalTransform(i, j);
 		}
+	setOverlayTracking();
 }
 
 
