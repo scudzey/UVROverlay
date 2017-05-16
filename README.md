@@ -1,7 +1,7 @@
 # UVROverlay
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6D4FGY2RBLSFS)  
 
-This is a ground up implementation VR window overlay manager built on openVR.  Currently in development for release and developed by myself.
+This is a ground up implementation VR window overlay manager built on openVR.  Use it to add netflix video playback inside your game, keep track of your twitch chat stream, or to have a quick reference to those pesky warp routes in your favorite VR space sim.  The uses are up to your imagination.
 
 ## Current release
 You can download the current release [here](https://github.com/scudzey/UVROverlay/releases)
